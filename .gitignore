@@ -1,0 +1,11 @@
+CMakeFiles
+CMakeLists.txt.user
+pybind11
+_deps
+CMakeCache.txt
+Makefile
+Telex.cpython-36m-x86_64-linux-gnu.so
+Telex.egg
+cmake_install.cmake
+dist
+Telex.egg-info

@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 3.8)
+# Must use GNUInstallDirs to install libraries into correct
+# locations on all platforms.
+include(GNUInstallDirs)
+include(ExternalProject)
+project(telexpy)
+include(FetchContent)
+
+FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11
+    GIT_TAG        v2.4.3
+)
+
+set(CMAKE_CXX_STANDARD 17)
+
+include_directories(
+    ../Telex-framework/telexlib/include
+    )
+
+FetchContent_GetProperties(pybind11)
+
+if(NOT pybind11_POPULATED)
+    FetchContent_Populate(pybind11)
+    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+endif()
+
+set(PYBIND11_PYTHON_VERSION 3.6)
+pybind11_add_module(Telex
+    telex_python.cpp)
+    
+add_custom_command(
+    TARGET Telex
+    POST_BUILD
+    COMMAND python3 setup.py sdist bdist_wheel
+    )
