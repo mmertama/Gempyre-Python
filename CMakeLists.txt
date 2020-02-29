@@ -25,12 +25,17 @@ if(NOT pybind11_POPULATED)
     add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
 endif()
 
+
+find_package (telex REQUIRED PATHS ../Telex-framework/telexlib)
+
 set(PYBIND11_PYTHON_VERSION 3.6)
 pybind11_add_module(Telex
     telex_python.cpp)
-    
+
 add_custom_command(
     TARGET Telex
     POST_BUILD
-    COMMAND python3 setup.py sdist bdist_wheel
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
     )
+
+target_link_libraries(Telex PRIVATE telex)

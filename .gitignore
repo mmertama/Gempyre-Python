@@ -9,3 +9,5 @@ Telex.egg
 cmake_install.cmake
 dist
 Telex.egg-info
+*.vcxproj*
+*.sln
