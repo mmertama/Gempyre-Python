@@ -27,7 +27,7 @@ class CMake_Build(build_ext):
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
             cmake_args += ['-A', 'x64']
-            build_args += ['--', '/m']
+            build_args += ['--', '/m']      
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             build_args += ['--', '-j2']
@@ -35,9 +35,14 @@ class CMake_Build(build_ext):
        
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd = self.build_temp)
-        
+
+        if platform.system() == "Windows":
+            subprocess.check_call(['runas /user:administrator cmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
+            subprocess.check_call(['runas /user:administrator cmake', '--build', '.'] + build_args, cwd = self.build_temp)
+        else:
+            subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
+            subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd = self.build_temp)
+
         
         
 setup (name = 'Telex',
