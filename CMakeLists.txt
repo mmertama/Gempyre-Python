@@ -26,6 +26,9 @@ if(NOT pybind11_POPULATED)
 endif()
 
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/README.md
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 find_package (telex REQUIRED PATHS ../Telex-framework/telexlib)
 
 set(PYBIND11_PYTHON_VERSION 3.6)

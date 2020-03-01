@@ -1,6 +1,9 @@
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 import os
+import sys
+import platform
+import subprocess
 
 class CMake_Extension(Extension):
     def __init__(self, name, sourcedir = ''):
@@ -41,6 +44,7 @@ setup (name = 'Telex',
        version = '1.0',
        description = 'Telex Framework',
        author = 'Markus Mertama',
+       author_email = 'foobar@foobar',
        url = 'https://github.com/mmertama',
        long_description = '''
 Telex is C++ Framework for quick and simple UI development and Telex-Python apply that breeze to Python development.
@@ -48,6 +52,7 @@ Telex is C++ Framework for quick and simple UI development and Telex-Python appl
      # packages=setuptools.find_packages()
       ext_modules = [CMake_Extension('cmake_example')],
       cmdclass = {'build_ext': CMake_Build},
-      zip_safe = False
+      zip_safe = False,
+      setup_requires=['wheel', 'sdist']
       )
        
