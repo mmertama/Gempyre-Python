@@ -11,3 +11,8 @@ dist
 Telex.egg-info
 *.vcxproj*
 *.sln
+.eggs 
+Release 
+Debug 
+Telex.dir 
+x64 
