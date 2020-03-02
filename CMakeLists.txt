@@ -13,6 +13,8 @@ FetchContent_Declare(
 )
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+add_compile_options(-fPIC)
 
 include_directories(
     ../Telex-framework/telexlib/include
