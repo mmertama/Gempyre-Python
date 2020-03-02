@@ -5,13 +5,13 @@ import sys
 import platform
 import subprocess
 
-class CMake_Extension(Extension):
+class CMakeExtension(Extension):
     def __init__(self, name, sourcedir = ''):
         Extension.__init__(self, name, sources = [])
         self.sourcedir = os.path.abspath(sourcedir)
 
 
-class CMake_Build(build_ext):
+class CMakeBuild(build_ext):
     def run(self):
         for ext in self.extensions:
             self.build_extension(ext)
@@ -35,6 +35,7 @@ class CMake_Build(build_ext):
        
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
+        print("Using temp:", self.build_temp)
 
         if platform.system() == "Windows":
             subprocess.check_call(['runas /user:administrator cmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
@@ -46,7 +47,7 @@ class CMake_Build(build_ext):
         
         
 setup (name = 'Telex',
-       version = '1.0',
+       version = '1.0.1',
        description = 'Telex Framework',
        author = 'Markus Mertama',
        author_email = 'foobar@foobar',
@@ -55,8 +56,8 @@ setup (name = 'Telex',
 Telex is C++ Framework for quick and simple UI development and Telex-Python apply that breeze to Python development.
 ''',
      # packages=setuptools.find_packages()
-      ext_modules = [CMake_Extension('cmake_example')],
-      cmdclass = {'build_ext': CMake_Build},
+      ext_modules = [CMakeExtension('Telex')],
+      cmdclass = {'build_ext': CMakeBuild},
       zip_safe = False,
       setup_requires=['wheel', 'sdist']
       )
