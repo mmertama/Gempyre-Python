@@ -19,3 +19,4 @@ x64
 Telex-1.0.1
 build
 *.pyc
+_deps
