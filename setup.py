@@ -15,7 +15,7 @@ class CMakeBuild(build_ext):
     def run(self):
         for ext in self.extensions:
             self.build_extension(ext)
-        build_ext.run()
+        super().run()
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
@@ -42,8 +42,8 @@ class CMakeBuild(build_ext):
 #            subprocess.check_call(['runas /user:administratorcmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
  #           subprocess.check_call(['runas /user:administrator cmake', '--build', '.'] + build_args, cwd = self.build_temp)
 #        else:
-        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd = self.build_temp)
+        #subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
+        #subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd = self.build_temp)
 
         
         

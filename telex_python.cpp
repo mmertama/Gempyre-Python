@@ -4,6 +4,7 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(Telex, m) {
+    m.def("setDebug", &Telex::setDebug);
     py::class_<Telex::Ui>(m, "Ui")
         .def(py::init<const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
              py::arg("indexHtml"),
