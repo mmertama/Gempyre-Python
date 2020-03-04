@@ -1,2 +1,2 @@
-cmake --build . --config Release --user
-pip3 install -e .
+cmake --build . --config Release
+pip3 install -e .  --user

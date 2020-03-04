@@ -1,4 +1,7 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/functional.h>
+#include <pybind11/chrono.h>
 #include <telex.h>
 
 namespace py = pybind11;
@@ -6,6 +9,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(Telex, m) {
     m.def("setDebug", &Telex::setDebug);
     py::class_<Telex::Ui>(m, "Ui")
+       /* I comment these out as using them is confusing due browser security concerns
         .def(py::init<const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
              py::arg("indexHtml"),
              py::arg("browser"),
@@ -18,6 +22,7 @@ PYBIND11_MODULE(Telex, m) {
                  py::arg("port") = Telex::Ui::UseDefaultPort,
                  py::arg("root") = Telex::Ui::UseDefaultRoot
                  )
+        */
         .def(py::init<const Telex::Ui::Filemap&, const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
              py::arg("filemap"),
              py::arg("indexHtml"),

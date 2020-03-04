@@ -1,6 +1,12 @@
+import sys
+import os
 import Telex
+from Telex_utils import resource
 
 Telex.setDebug()
-ui = Telex.Ui("python_test_1.html")
+name = sys.argv[1]
+map, names = resource.fromFile(name)
+print(names[name], name)
+ui = Telex.Ui(map, names[name])
 ui.run()
 
