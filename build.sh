@@ -1,2 +1,4 @@
 cmake --build . --config Release
-pip3 install -e .  --user
+mv *.so build/lib.linux-x86_64-3.6/
+
+pip3 install -e . --user
