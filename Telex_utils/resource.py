@@ -3,7 +3,7 @@ import base64
 import re
 import os
 
-def fromFile(*argv):
+def from_file(*argv):
     """
     Generates a filemap for Telex
     :param argv: argument list of filenames.
