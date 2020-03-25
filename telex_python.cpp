@@ -17,6 +17,7 @@ PYBIND11_MODULE(Telex, m) {
             .def(py::init<const Telex::Element&>())
             .def(py::init<Telex::Ui&, const std::string&>())
             .def(py::init<Telex::Ui&, const std::string, const std::string&, const Telex::Element&>())
+            .def(py::init<Telex::Ui&, const std::string&, const Telex::Element&>())
             .def("ui", py::overload_cast<>(&Telex::Element::ui, py::const_))
             .def("ui", py::overload_cast<>(&Telex::Element::ui))
             .def("id", &Telex::Element::id)
