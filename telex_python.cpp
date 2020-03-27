@@ -3,15 +3,23 @@
 #include <pybind11/functional.h>
 #include <pybind11/chrono.h>
 #include <telex.h>
+#include <telex_graphics.h>
 
 namespace py = pybind11;
 
 PYBIND11_MODULE(Telex, m) {
     m.def("set_debug", &Telex::setDebug);
     m.def("version", &Telex::version);
+
     py::class_<Telex::Event>(m, "Event")
             .def_readonly("element", &Telex::Event::element)
             .def_readonly("properties", &Telex::Event::properties)
+            ;
+    py::class_<Telex::Element::Rect>(m, "Rect")
+            .def_readwrite("x", &Telex::Element::Rect::x)
+            .def_readwrite("y", &Telex::Element::Rect::y)
+            .def_readwrite("width", &Telex::Element::Rect::width)
+            .def_readwrite("height", &Telex::Element::Rect::height)
             ;
     py::class_<Telex::Element>(m, "Element")
             .def(py::init<const Telex::Element&>())
@@ -101,4 +109,43 @@ PYBIND11_MODULE(Telex, m) {
         .def("begin_batch", &Telex::Ui::beginBatch)
         .def("end_batch", &Telex::Ui::endBatch)
             ;
+
+        py::class_<Telex::CanvasElement, Telex::Element>(m, "CanvasElement")
+                .def(py::init<const Telex::CanvasElement&>())
+                .def(py::init<Telex::Ui&, const std::string&>())
+                .def(py::init<Telex::Ui&, const std::string&, const Telex::Element&>())
+                .def("add_image", &Telex::CanvasElement::addImage, py::arg("url"), py::arg("loaded") = nullptr)
+                .def("paint_image", py::overload_cast<const std::string&, int, int, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
+                .def("paint_image_rect", py::overload_cast<const std::string&, const Telex::Element::Rect&, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
+                ;
+        m.def("color_rgba_clamped", &Telex::Color::rgbaClamped);
+        m.def("color_rgba", &Telex::Color::rgba);
+        m.def("color_r", &Telex::Color::r);
+        m.def("color_g", &Telex::Color::g);
+        m.def("color_b", &Telex::Color::b);
+        m.def("color_alpha", &Telex::Color::alpha)
+        ;
+
+        py::class_<Telex::Graphics>(m, "CanvasElement")
+                .def(py::init<Telex::CanvasElement&, int, int>())
+                .def(py::init<Telex::CanvasElement&>())
+                .def(py::init<const Telex::Graphics&>())
+                .def("create", &Telex::Graphics::create)
+                .def("clone", &Telex::Graphics::clone)
+                .def_static("pix", &Telex::Graphics::pix, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF)
+                .def_property_readonly_static("Black", [](){return Telex::Graphics::Black;})
+                .def_property_readonly_static("White", [](){return Telex::Graphics::White;})
+                .def_property_readonly_static("Black", [](){return Telex::Graphics::Black;})
+                .def_property_readonly_static("Red", [](){return Telex::Graphics::Red;})
+                .def_property_readonly_static("Green", [](){return Telex::Graphics::Green;})
+                .def_property_readonly_static("Blue", [](){return Telex::Graphics::Blue;})
+                .def("set_pixel", &Telex::Graphics::setPixel)
+                .def("set_alpha", &Telex::Graphics::setAlpha)
+                .def("width", &Telex::Graphics::width)
+                .def("height", &Telex::Graphics::height)
+                .def("draw_rect", &Telex::Graphics::drawRect)
+                .def("merge", &Telex::Graphics::merge)
+                .def("swap", &Telex::Graphics::swap)
+                .def("update", &Telex::Graphics::update)
+                ;
 }
