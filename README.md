@@ -1,6 +1,6 @@
-#Telex-Python 
+# Telex-Python 
 
-##Build
+## Build
 
 <pre>
 Clone Telex-framework (https://github.com/mmertama/Telex-framework.git)
