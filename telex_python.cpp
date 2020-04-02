@@ -114,7 +114,10 @@ PYBIND11_MODULE(Telex, m) {
                 .def(py::init<const Telex::CanvasElement&>())
                 .def(py::init<Telex::Ui&, const std::string&>())
                 .def(py::init<Telex::Ui&, const std::string&, const Telex::Element&>())
-                .def("add_image", &Telex::CanvasElement::addImage, py::arg("url"), py::arg("loaded") = nullptr)
+                .def("add_image", [](Telex::CanvasElement* canvas, const std::string& url, const std::function<void (const std::string&)> loaded = nullptr){
+                    return canvas->addImage(url, [loaded](const std::string& id) {if(loaded) {py::gil_scoped_acquire acquire; loaded(id);}});})
+                .def("add_images", [](Telex::CanvasElement* canvas, const std::vector<std::string> urls, const std::function<void (const std::vector<std::string>&)>& loaded = nullptr) {
+                    return canvas->addImages(urls, [loaded](const std::vector<std::string>& vec) {if(loaded) {py::gil_scoped_acquire acquire; loaded(vec);}});})
                 .def("paint_image", py::overload_cast<const std::string&, int, int, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
                 .def("paint_image_rect", py::overload_cast<const std::string&, const Telex::Element::Rect&, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
                 ;
@@ -126,7 +129,7 @@ PYBIND11_MODULE(Telex, m) {
         m.def("color_alpha", &Telex::Color::alpha)
         ;
 
-        py::class_<Telex::Graphics>(m, "CanvasElement")
+        py::class_<Telex::Graphics>(m, "Graphics")
                 .def(py::init<Telex::CanvasElement&, int, int>())
                 .def(py::init<Telex::CanvasElement&>())
                 .def(py::init<const Telex::Graphics&>())
