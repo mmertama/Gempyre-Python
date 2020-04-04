@@ -44,3 +44,4 @@ add_custom_command(
     )
 
 target_link_libraries(Telex PRIVATE telex)
+

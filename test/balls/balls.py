@@ -18,7 +18,7 @@ class Wall(enum.Enum):
 class Bullet:
     def __init__(self, image, direction, x, y, width, height):
         self.direction = direction
-        self.speed = 3.0
+        self.speed = 10.0
         self.x = x
         self.y = y
         self.width = width
@@ -73,9 +73,10 @@ class Game:
         rect = self.canvas.rect()
         self.width = rect.width
         self.height = rect.height
-        self.ui.start_timer(timedelta(milliseconds=20), False, self.game_loop)
+        self.ui.start_timer(timedelta(milliseconds=10), False, self.game_loop)
 
     def game_loop(self):
+        self.canvas.erase()
         for bullet in self.bullets:
             bullet.step()
             wall = bullet.test_inside(0, 0, self.width, self.height)
@@ -94,6 +95,7 @@ class Game:
     def shoot(self):
         self.bullets.append(Bullet(self.bullet, 1.0, 200, 400, 20, 20))
 
+
 def main():
     root = os.path.dirname(sys.argv[0]) + '/assets/'
     files = ["balls.html", "barrel.png", "barrier.png", "bullet.png", "dome.png", "numbers.png", "skull.png"]
@@ -111,7 +113,7 @@ def main():
     images = canvas.add_images(urls, lambda _: game.start())
     game = Game(ui, canvas, zip(files[1:], images))
 
-    Telex.Element(ui, "shoot").subscribe("click", lambda e: game.shoot())
+    Telex.Element(ui, "shoot").subscribe("click", lambda _: game.shoot())
 
     ui.run()
 

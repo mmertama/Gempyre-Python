@@ -161,6 +161,8 @@ PYBIND11_MODULE(Telex, m) {
                 .def("paint_image", py::overload_cast<const std::string&, int, int, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
                 .def("paint_image_rect", py::overload_cast<const std::string&, const Telex::Element::Rect&, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
 #endif
+                .def("draw", &Telex::CanvasElement::draw)
+                .def("erase", &Telex::CanvasElement::erase, py::arg("resized") = false)
                 ;
         m.def("color_rgba_clamped", &Telex::Color::rgbaClamped);
         m.def("color_rgba", &Telex::Color::rgba);
