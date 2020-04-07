@@ -18,7 +18,7 @@ class Wall(enum.Enum):
 class Bullet:
     def __init__(self, image, direction, x, y, width, height):
         self.direction = direction
-        self.speed = 10.0
+        self.speed = 3.0
         self.x = x
         self.y = y
         self.width = width
@@ -61,6 +61,8 @@ class Game:
         self.width = 0
         self.height = 0
         self.bullets = []
+        self.rect = None
+        self.angle = 0
 
     @staticmethod
     def _get(name, images):
@@ -69,13 +71,16 @@ class Game:
                 return im[1]
         return None
 
+    def init(self):
+        self.rect = self.canvas.rect()
+        self.width = self.rect.width
+        self.height = self.rect.height
+
     def start(self):
-        rect = self.canvas.rect()
-        self.width = rect.width
-        self.height = rect.height
-        self.ui.start_timer(timedelta(milliseconds=10), False, self.game_loop)
+        self.ui.start_timer(timedelta(milliseconds=20), False, self.game_loop)
 
     def game_loop(self):
+       # self.ui.begin_batch()
         self.canvas.erase()
         for bullet in self.bullets:
             bullet.step()
@@ -84,6 +89,16 @@ class Game:
                 bullet.turn(wall)
                 bullet.step()
             self.canvas.paint_image_rect(self.bullet, Telex.Rect(bullet.x, bullet.y, bullet.width, bullet.height))
+        self.canvas.paint_image_rect(self.dome, Telex.Rect(self.width / 2 - 50, self.height - 60, 100, 50))
+        self.canvas.draw([
+                         "save",
+                         "translate", (self.width / 2), (self.width - 30),
+                         "rotate", self.angle,
+                         "translate", -(self.width / 2), -(self.width - 30),
+                         "drawImageRect", self.barrel, self.width / 2 - 5, self.width - 100, 10, 40,
+                         "restore"
+                        ])
+        #self.ui.end_batch()
 
         #  self.canvas.paint_image(self.barrel, 10, 10)
         #  self.canvas.paint_image(self.barrier, 10, 50)
@@ -93,7 +108,12 @@ class Game:
         # self.canvas.paint_image(self.skull, 10, 250)
 
     def shoot(self):
-        self.bullets.append(Bullet(self.bullet, 1.0, 200, 400, 20, 20))
+        start_x = (self.width / 2 - 10) + 110 * math.sin(self.angle)
+        start_y = (self.width - 30 - 10) - 110 * math.cos(self.angle)
+        self.bullets.append(Bullet(self.bullet, math.pi - self.angle, start_x, start_y, 20, 20))
+
+    def turret(self, angle):
+        self.angle = angle
 
 
 def main():
@@ -113,7 +133,21 @@ def main():
     images = canvas.add_images(urls, lambda _: game.start())
     game = Game(ui, canvas, zip(files[1:], images))
 
-    Telex.Element(ui, "shoot").subscribe("click", lambda _: game.shoot())
+    canvas.subscribe("click", lambda _: game.shoot())
+
+    ui.on_open(lambda: game.init())
+
+    def get_property(event):
+        if event:
+            nonlocal game
+            x = float(event.properties["clientX"])
+            y = float(event.properties["clientY"])
+            mid_x = game.rect.width / 2
+            return math.atan2((game.rect.height - y), mid_x - x) - math.pi / 2
+        return 0
+
+    canvas.subscribe("mousemove", lambda e: game.turret(get_property(e)),
+                     ["clientX", "clientY"], timedelta(milliseconds=100))
 
     ui.run()
 

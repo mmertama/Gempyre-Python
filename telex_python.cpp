@@ -4,20 +4,43 @@
 #include <pybind11/chrono.h>
 #include <telex.h>
 #include <telex_graphics.h>
+#include <../src/json.h> //as pybind11 wont support std::any we convert them to string using this internal class, sorry
+
 
 namespace py = pybind11;
 
-#define RECTF
 
-#ifdef RECTF
 class RectF {
 public:
     double x, y, width, height;
-    operator Telex::Element::Rect() const {return Telex::Element::Rect{static_cast<int>(x), static_cast<int>(y), static_cast<int>(width), static_cast<int>(height)};}
+    operator Telex::Element::Rect() const {
+        return Telex::Element::Rect{static_cast<int>(x), static_cast<int>(y), static_cast<int>(width), static_cast<int>(height)};
+    }
 };
 
-RectF rectF(const Telex::Element::Rect& r) {return RectF{ static_cast<double>(r.x), static_cast<double>(r.y), static_cast<double>(r.width), static_cast<double>(r.height) };}
-#endif
+
+
+static RectF rectF(const Telex::Element::Rect& r) {
+    return RectF{ static_cast<double>(r.x), static_cast<double>(r.y), static_cast<double>(r.width), static_cast<double>(r.height) };
+}
+
+
+static  std::optional<std::string> TelexExtension(Telex::Ui* ui, const std::string& callId, const std::unordered_map<std::string, std::string>& parameters) {
+    std::unordered_map<std::string, std::any> params;
+    for(const auto& [k, v] : parameters) {
+        const auto any = Telex::toAny(v); // Not sure how well tested
+        if(any)
+            params.emplace(k, any);
+         else {
+            std::cerr << "Cannot make " << k << "->" << v << " to any" << std::endl;
+            return std::nullopt;
+        }
+    }
+    std::optional<std::any> ext =  ui->extension(callId, params);
+    return ext ? Telex::toString(*ext) : std::nullopt;
+}
+
+
 
 PYBIND11_MODULE(Telex, m) {
     m.def("set_debug", &Telex::setDebug);
@@ -27,7 +50,7 @@ PYBIND11_MODULE(Telex, m) {
             .def_readonly("element", &Telex::Event::element)
             .def_readonly("properties", &Telex::Event::properties)
             ;
-#ifdef RECTF
+
     py::class_<RectF>(m, "Rect")
             .def(py::init<>())
             .def(py::init<double, double, double, double>())
@@ -36,16 +59,7 @@ PYBIND11_MODULE(Telex, m) {
             .def_readwrite("width", &RectF::width)
             .def_readwrite("height", &RectF::height)
             ;
-#else
-    py::class_<Telex::Element::Rect>(m, "Rect")
-            .def(py::init<>())
-            .def(py::init<int, int, int, int>())
-            .def_readwrite("x", &Telex::Element::Rect::x)
-            .def_readwrite("y", &Telex::Element::Rect::y)
-            .def_readwrite("width", &Telex::Element::Rect::width)
-            .def_readwrite("height", &Telex::Element::Rect::height)
-            ;
-#endif
+
     py::class_<Telex::Element>(m, "Element")
             .def(py::init<const Telex::Element&>())
             .def(py::init<Telex::Ui&, const std::string&>())
@@ -65,14 +79,11 @@ PYBIND11_MODULE(Telex, m) {
             .def("html", &Telex::Element::html)
             .def("remove", &Telex::Element::remove)
             .def("type", &Telex::Element::type)
- #ifdef RECTF
             .def("rect", [](Telex::Element* el) {
                 const auto r = el->rect();
                 return r ? std::make_optional<RectF>(::rectF(*r)) :  std::nullopt;
                 })
-#else
-            .def("rect", &Telex::Element::rect)
-#endif
+//            .def("rect", &Telex::Element::rect)
             ;
     py::class_<Telex::Ui>(m, "Ui")
        // Should I comment these out as using them is confusing due browser security concerns
@@ -135,7 +146,7 @@ PYBIND11_MODULE(Telex, m) {
         .def("by_class", &Telex::Ui::byClass)
         .def("by_name", &Telex::Ui::byName)
         .def("ping", &Telex::Ui::ping)
-        .def("extension", &Telex::Ui::extension)
+         .def("extension", &TelexExtension)
         .def("resource", &Telex::Ui::resource)
         .def("add_file", &Telex::Ui::addFile)
         .def("begin_batch", &Telex::Ui::beginBatch)
@@ -150,17 +161,16 @@ PYBIND11_MODULE(Telex, m) {
                     return canvas->addImage(url, [loaded](const std::string& id) {if(loaded) {py::gil_scoped_acquire acquire; loaded(id);}});})
                 .def("add_images", [](Telex::CanvasElement* canvas, const std::vector<std::string> urls, const std::function<void (const std::vector<std::string>&)>& loaded = nullptr) {
                     return canvas->addImages(urls, [loaded](const std::vector<std::string>& vec) {if(loaded) {py::gil_scoped_acquire acquire; loaded(vec);}});})
-#ifdef RECTF
                 .def("paint_image", [](Telex::CanvasElement* el, const std::string& imageId, int x, int y, const RectF& clippingRect) {
                     el->paintImage(imageId, x, y, clippingRect);
                     }, py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
                 .def("paint_image_rect", [](Telex::CanvasElement* el, const std::string& imageId, const RectF& targetRect, const RectF& clippingRect) {
                     el->paintImage(imageId, targetRect, clippingRect);
                     }, py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
-#else
-                .def("paint_image", py::overload_cast<const std::string&, int, int, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
-                .def("paint_image_rect", py::overload_cast<const std::string&, const Telex::Element::Rect&, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
-#endif
+
+//                .def("paint_image", py::overload_cast<const std::string&, int, int, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
+//                .def("paint_image_rect", py::overload_cast<const std::string&, const Telex::Element::Rect&, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
+
                 .def("draw", &Telex::CanvasElement::draw)
                 .def("erase", &Telex::CanvasElement::erase, py::arg("resized") = false)
                 ;
@@ -189,11 +199,10 @@ PYBIND11_MODULE(Telex, m) {
                 .def("set_alpha", &Telex::Graphics::setAlpha)
                 .def("width", &Telex::Graphics::width)
                 .def("height", &Telex::Graphics::height)
-#ifdef RECTF
                 .def("draw_rect", [](Telex::Graphics* g, const RectF& r, Telex::Color::type c) {g->drawRect(r, c);})
-#else
-                .def("draw_rect", &Telex::Graphics::drawRect)
-#endif
+
+//               .def("draw_rect", &Telex::Graphics::drawRect)
+
                 .def("merge", &Telex::Graphics::merge)
                 .def("swap", &Telex::Graphics::swap)
                 .def("update", &Telex::Graphics::update)
