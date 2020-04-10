@@ -1,42 +1,30 @@
 import sys
 import os
 import math
-import enum
 import random
+import functools
 from datetime import timedelta
 import Telex
 from Telex_utils import resource
 
 
-class Hit(enum.Enum):
-    NONE = 0
-    LEFT = 1
-    RIGHT = 2
-    BOTTOM = 3
-    TOP = 4
-
-
 class Monster:
     def __init__(self, x, y, width, height):
-        self.speed = 3.0
+        self.speed = 2.8
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.radius2 = width * width + height * height
 
     def step(self):
         self.y += self.speed
 
     def test_inside(self, x, y, width, height):
-        if self.y + self.height > y + height:
-            return Hit.BOTTOM
-        return Hit.NONE
+        return self.y + self.height > y + height
 
 
 class Bullet:
     def __init__(self, direction, x, y, width, height):
-        self.direction = direction
         self.speed = 3.0
         self.x = x
         self.y = y
@@ -44,8 +32,8 @@ class Bullet:
         self.height = height
         self.step_x = math.sin(direction) * self.speed
         self.step_y = math.cos(direction) * self.speed
-        self.radius2 = width *  width + height * height
-        self.hit_in = False
+        self.hit_in_x = False
+        self.hit_in_y = False
 
     def step(self):
         self.x += self.step_x
@@ -53,38 +41,35 @@ class Bullet:
 
     def test_inside(self, x, y, width, height):
         if self.x < x:
-            return Hit.LEFT
-        if self.x + self.width > x + width:
-            return Hit.RIGHT
-        if self.y < y:
-            return Hit.TOP
-        if self.y + self.height > y + height:
-            return Hit.BOTTOM
-        return Hit.NONE
-
-    def test_outside(self, x, y, radius2):
-        dx = self.x - x
-        dy = self.y - y
-        d = dx * dx + dy * dy
-        if d <= self.radius2 + radius2:
-            if self.hit_in:
-                return Hit.NONE
-            self.hit_in = True
-            h = self.x - x
-            v = self.y - y
-            if h < v:
-                return Hit.LEFT if h > 0 else Hit.RIGHT
-            else:
-                return Hit.TOP if v > 0 else Hit.BOTTOM
-        if self.hit_in:
-            self.hit_in = False
-        return Hit.NONE
-
-    def turn(self, wall):
-        if wall == Hit.LEFT or wall == Hit.RIGHT:
             self.step_x *= -1.0
-        if wall == Hit.TOP or wall == Hit.BOTTOM:
+            self.x = x
+        elif self.x + self.width > x + width:
+            self.step_x *= -1.0
+            self.x = width - self.width
+        elif self.y < y:
             self.step_y *= -1.0
+            self.y = y
+        elif self.y + self.height > y + height:
+            self.step_y *= -1.0
+            self.y = height - self.height
+        return False
+
+    def test_outside(self, other):
+        ox = other.x + other.width
+        oy = other.y + other.height
+        sx = self.x + self.width
+        sy = self.y + self.height
+        mx = self.x + self.step_x < ox and sx + self.step_x > other.x and self.y < oy and sy > other.y
+        my = self.y + self.step_y < oy and sy + self.step_y > other.y and self.x < ox and sx > other.x
+        if mx and not self.hit_in_x:
+            self.step_x *= -1.0
+            self.hit_in_x = True
+        if my and not self.hit_in_y:
+            self.step_y *= -1.0
+            self.hit_in_y = True
+        if not mx and not my:
+            self.hit_in_x = False
+            self.hit_in_y = False
 
 
 class Game:
@@ -125,24 +110,29 @@ class Game:
 
         for bullet in self.bullets:
             bullet.step()
-            wall = bullet.test_inside(0, 0, self.width, self.height)
-            if wall != Hit.NONE:
-                bullet.turn(wall)
+            to_delete = bullet.test_inside(0, 0, self.width, self.height)
+            if to_delete:
+                self.bullets.remove(bullet)
+            else:
                 bullet.step()
-            for monster in self.monsters:
-                hit = bullet.test_outside(monster.x, monster.y, monster.radius2)
-                if hit != Hit.NONE:
-                    bullet.turn(hit)
+                for monster in self.monsters:
+                    bullet.test_outside(monster)
                     bullet.step()
-            command_list.extend(["drawImageRect", self.bullet, bullet.x, bullet.y, bullet.width, bullet.height])
+                command_list.extend(["drawImageRect", self.bullet, bullet.x, bullet.y, bullet.width, bullet.height])
 
+        ontop = 0
         for monster in self.monsters:
             monster.step()
+            if monster.y < 0:
+                ontop += 1
             command_list.extend(["drawImageRect", self.skull, monster.x, monster.y, monster.width, monster.height])
-            wall = monster.test_inside(0, 0, self.width, self.height)
-            if wall == Hit.BOTTOM:
+            to_delete = monster.test_inside(0, 0, self.width, self.height)
+            if to_delete:
                 self.monsters.remove(monster)
-                self.monsters.append(Monster(random.randint(0, self.width - 40), -40, 40, 40))
+    
+        if ontop == 0 and random.randint(0, 50) == 5:
+            x_pos = random.randint(0, self.width - 40)
+            self.monsters.append(Monster(x_pos, -40, 40, 40))
 
         command_list.extend(["drawImageRect", self.dome, self.width / 2 - 50, self.height - 60, 100, 50])
         command_list.extend([
