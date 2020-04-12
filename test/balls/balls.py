@@ -2,25 +2,43 @@ import sys
 import os
 import math
 import random
-import functools
 from datetime import timedelta
 import Telex
 from Telex_utils import resource
 
 
+class Number:
+    def __init__(self, images):
+        self.images = images
+
+    def draw(self, g, x, y, width, height, value):
+        #g.extend(["drawImageClip", self.images, x, y, width, height, self.n_width * value, 0, self.n_width, self.height])
+        g.extend(
+            ["drawImageClip", self.images, 13 * value, 0, 13, 25, x, y, width, height])
+
+
 class Monster:
-    def __init__(self, x, y, width, height):
-        self.speed = 2.8
+    def __init__(self, x, y, width, height, endurance, numbers):
+        self.speed = 1.0
         self.x = x
         self.y = y
         self.width = width
         self.height = height
+        self.numbers = numbers
+        self.endurance = endurance
 
     def step(self):
         self.y += self.speed
 
     def test_inside(self, x, y, width, height):
         return self.y + self.height > y + height
+
+    def draw(self, g, image):
+        g.extend(["drawImageRect", image, self.x, self.y, self.width, self.height])
+        f1 = int(self.endurance / 10)
+        f2 = self.endurance - (f1 * 10)
+        self.numbers.draw(g, self.x + 6, self.y + 6, 10, 10, f1)
+        self.numbers.draw(g, self.x + 24, self.y + 6, 10, 10, f2)
 
 
 class Bullet:
@@ -54,22 +72,29 @@ class Bullet:
             self.y = height - self.height
         return False
 
-    def test_outside(self, other):
+    def test_hit(self, other):
         ox = other.x + other.width
         oy = other.y + other.height
         sx = self.x + self.width
         sy = self.y + self.height
         mx = self.x + self.step_x < ox and sx + self.step_x > other.x and self.y < oy and sy > other.y
         my = self.y + self.step_y < oy and sy + self.step_y > other.y and self.x < ox and sx > other.x
+        has_hit = False
         if mx and not self.hit_in_x:
             self.step_x *= -1.0
             self.hit_in_x = True
+            has_hit = True
         if my and not self.hit_in_y:
             self.step_y *= -1.0
             self.hit_in_y = True
+            has_hit = True
         if not mx and not my:
             self.hit_in_x = False
             self.hit_in_y = False
+        return has_hit
+
+    def draw(self, g, image):
+        g.extend(["drawImageRect", image, self.x, self.y, self.width, self.height])
 
 
 class Game:
@@ -88,6 +113,7 @@ class Game:
         self.monsters = []
         self.rect = None
         self.angle = 0
+        self.numberDrawer = None
 
     @staticmethod
     def _get(name, images):
@@ -100,10 +126,14 @@ class Game:
         self.rect = self.canvas.rect()
         self.width = self.rect.width
         self.height = self.rect.height
+        self.numberDrawer = Number(self.numbers)
+
+    def create_monster(self, x_pos):
+        self.monsters.append(Monster(x_pos, -40, 40, 40, random.randint(1, 99), self.numberDrawer))
 
     def start(self):
-        self.ui.start_timer(timedelta(milliseconds=30), False, self.game_loop)
-        self.monsters.append(Monster(random.randint(0, self.width - 40), -40, 40, 40))
+        self.ui.start_timer(timedelta(milliseconds=50), False, self.game_loop)
+        self.create_monster(random.randint(0, self.width - 40))
 
     def game_loop(self):
         command_list = ["clearRect", 0, 0, self.width, self.height]
@@ -116,23 +146,26 @@ class Game:
             else:
                 bullet.step()
                 for monster in self.monsters:
-                    bullet.test_outside(monster)
+                    if bullet.test_hit(monster):
+                        monster.endurance -= 1
+                        if monster.endurance <= 0:
+                            self.monsters.remove(monster)
                     bullet.step()
-                command_list.extend(["drawImageRect", self.bullet, bullet.x, bullet.y, bullet.width, bullet.height])
+                bullet.draw(command_list, self.bullet)
 
-        ontop = 0
+        on_top = 0 # only one above top line to avoid collisions.
         for monster in self.monsters:
             monster.step()
             if monster.y < 0:
-                ontop += 1
-            command_list.extend(["drawImageRect", self.skull, monster.x, monster.y, monster.width, monster.height])
+                on_top += 1
+            monster.draw(command_list, self.skull)
             to_delete = monster.test_inside(0, 0, self.width, self.height)
             if to_delete:
                 self.monsters.remove(monster)
-    
-        if ontop == 0 and random.randint(0, 50) == 5:
+
+        if on_top == 0 and random.randint(0, 50) == 5:
             x_pos = random.randint(0, self.width - 40)
-            self.monsters.append(Monster(x_pos, -40, 40, 40))
+            self.create_monster(x_pos)
 
         command_list.extend(["drawImageRect", self.dome, self.width / 2 - 50, self.height - 60, 100, 50])
         command_list.extend([
