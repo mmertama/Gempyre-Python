@@ -43,15 +43,14 @@ class Monster:
 
 class Bullet:
     def __init__(self, direction, x, y, width, height):
-        self.speed = 3.0
+        self.speed = 2.0
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.step_x = math.sin(direction) * self.speed
         self.step_y = math.cos(direction) * self.speed
-        self.hit_in_x = False
-        self.hit_in_y = False
+        self.hit_in = False
 
     def step(self):
         self.x += self.step_x
@@ -70,6 +69,7 @@ class Bullet:
         elif self.y + self.height > y + height:
             self.step_y *= -1.0
             self.y = height - self.height
+            return True
         return False
 
     def test_hit(self, other):
@@ -77,20 +77,27 @@ class Bullet:
         oy = other.y + other.height
         sx = self.x + self.width
         sy = self.y + self.height
-        mx = self.x + self.step_x < ox and sx + self.step_x > other.x and self.y < oy and sy > other.y
-        my = self.y + self.step_y < oy and sy + self.step_y > other.y and self.x < ox and sx > other.x
+
+        mx = self.x + self.step_x < ox and sx + self.step_x > other.x and (self.y < oy and sy > other.y)
+        my = self.y + self.step_y < oy and sy + self.step_y > other.y and (self.x < ox and sx > other.x)
+
         has_hit = False
-        if mx and not self.hit_in_x:
+
+        if mx and my and not self.hit_in:
+            dx = min(sx, ox) - max(other.x, self.x)
+            dy = min(sy, oy) - max(other.y, self.y)
+            if dx < dy:
+                my = False
+            else:
+                mx = False
+        if mx and not self.hit_in:
             self.step_x *= -1.0
-            self.hit_in_x = True
             has_hit = True
-        if my and not self.hit_in_y:
+        if my and not self.hit_in:
             self.step_y *= -1.0
-            self.hit_in_y = True
             has_hit = True
-        if not mx and not my:
-            self.hit_in_x = False
-            self.hit_in_y = False
+
+        self.hit_in = mx or my
         return has_hit
 
     def draw(self, g, image):
@@ -153,19 +160,25 @@ class Game:
                     bullet.step()
                 bullet.draw(command_list, self.bullet)
 
-        on_top = 0 # only one above top line to avoid collisions.
+        gaps = []
         for monster in self.monsters:
             monster.step()
             if monster.y < 0:
-                on_top += 1
+                gaps.append(monster.x)
             monster.draw(command_list, self.skull)
             to_delete = monster.test_inside(0, 0, self.width, self.height)
             if to_delete:
                 self.monsters.remove(monster)
 
-        if on_top == 0 and random.randint(0, 50) == 5:
+        if random.randint(0, 50) == 5:
             x_pos = random.randint(0, self.width - 40)
-            self.create_monster(x_pos)
+            is_ok = True
+            for x in gaps:
+                if (x_pos > x) and (x_pos < x + 40):
+                    is_ok = False
+                    break
+            if is_ok:
+                self.create_monster(x_pos)
 
         command_list.extend(["drawImageRect", self.dome, self.width / 2 - 50, self.height - 60, 100, 50])
         command_list.extend([
