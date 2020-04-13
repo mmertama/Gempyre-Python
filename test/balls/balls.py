@@ -12,9 +12,7 @@ class Number:
         self.images = images
 
     def draw(self, g, x, y, width, height, value):
-        #g.extend(["drawImageClip", self.images, x, y, width, height, self.n_width * value, 0, self.n_width, self.height])
-        g.extend(
-            ["drawImageClip", self.images, 13 * value, 0, 13, 25, x, y, width, height])
+        g.draw_image_clip(self.images, Telex.Rect(13 * value, 0, 13, 25), Telex.Rect(x, y, width, height))
 
 
 class Monster:
@@ -34,7 +32,7 @@ class Monster:
         return self.y + self.height > y + height
 
     def draw(self, g, image):
-        g.extend(["drawImageRect", image, self.x, self.y, self.width, self.height])
+        g.draw_image_rect(image, Telex.Rect(self.x, self.y, self.width, self.height))
         f1 = int(self.endurance / 10)
         f2 = self.endurance - (f1 * 10)
         self.numbers.draw(g, self.x + 6, self.y + 6, 10, 10, f1)
@@ -101,7 +99,7 @@ class Bullet:
         return has_hit
 
     def draw(self, g, image):
-        g.extend(["drawImageRect", image, self.x, self.y, self.width, self.height])
+        g.draw_image_rect(image, Telex.Rect(self.x, self.y, self.width, self.height))
 
 
 class Game:
@@ -143,7 +141,8 @@ class Game:
         self.create_monster(random.randint(0, self.width - 40))
 
     def game_loop(self):
-        command_list = ["clearRect", 0, 0, self.width, self.height]
+        fc = Telex.FrameComposer()
+        fc.clear_rect(Telex.Rect(0, 0, self.width, self.height))
 
         for bullet in self.bullets:
             bullet.step()
@@ -158,14 +157,14 @@ class Game:
                         if monster.endurance <= 0:
                             self.monsters.remove(monster)
                     bullet.step()
-                bullet.draw(command_list, self.bullet)
+                bullet.draw(fc, self.bullet)
 
         gaps = []
         for monster in self.monsters:
             monster.step()
             if monster.y < 0:
                 gaps.append(monster.x)
-            monster.draw(command_list, self.skull)
+            monster.draw(fc, self.skull)
             to_delete = monster.test_inside(0, 0, self.width, self.height)
             if to_delete:
                 self.monsters.remove(monster)
@@ -180,16 +179,14 @@ class Game:
             if is_ok:
                 self.create_monster(x_pos)
 
-        command_list.extend(["drawImageRect", self.dome, self.width / 2 - 50, self.height - 60, 100, 50])
-        command_list.extend([
-                         "save",
-                         "translate", (self.width / 2), (self.width - 30),
-                         "rotate", self.angle,
-                         "translate", -(self.width / 2), -(self.width - 30),
-                         "drawImageRect", self.barrel, self.width / 2 - 5, self.width - 100, 10, 40,
-                         "restore"
-                        ])
-        self.canvas.draw(command_list)
+        fc.draw_image_rect(self.dome, Telex.Rect(self.width / 2 - 50, self.height - 60, 100, 50))
+        fc.save()
+        fc.translate(self.width / 2, self.width - 30)
+        fc.rotate(self.angle)
+        fc.translate(-(self.width / 2), -(self.width - 30))
+        fc.draw_image_rect(self.barrel, Telex.Rect(self.width / 2 - 5, self.width - 100, 10, 40))
+        fc.restore()
+        self.canvas.draw_frame(fc)
 
     def shoot(self):
         start_x = (self.width / 2 - 10) + 110 * math.sin(self.angle)

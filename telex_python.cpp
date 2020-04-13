@@ -167,11 +167,8 @@ PYBIND11_MODULE(Telex, m) {
                 .def("paint_image_rect", [](Telex::CanvasElement* el, const std::string& imageId, const RectF& targetRect, const RectF& clippingRect) {
                     el->paintImage(imageId, targetRect, clippingRect);
                     }, py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
-
-//                .def("paint_image", py::overload_cast<const std::string&, int, int, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
-//                .def("paint_image_rect", py::overload_cast<const std::string&, const Telex::Element::Rect&, const Telex::Element::Rect&>(&Telex::CanvasElement::paintImage), py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = Telex::Element::Rect{0, 0, 0, 0})
-
-                .def("draw", &Telex::CanvasElement::draw)
+                .def("draw_commands", py::overload_cast<const Telex::CanvasElement::CommandList&>(&Telex::CanvasElement::draw))
+                .def("draw_frame", py::overload_cast<const Telex::FrameComposer&>(&Telex::CanvasElement::draw))
                 .def("erase", &Telex::CanvasElement::erase, py::arg("resized") = false)
                 ;
         m.def("color_rgba_clamped", &Telex::Color::rgbaClamped);
@@ -207,14 +204,14 @@ PYBIND11_MODULE(Telex, m) {
                 .def("swap", &Telex::Graphics::swap)
                 .def("update", &Telex::Graphics::update)
                 ;
-/*
+
         py::class_<Telex::FrameComposer>(m, "FrameComposer")
                 .def(py::init<>())
                 .def(py::init<Telex::CanvasElement::CommandList&>())
                 .def(py::init<const Telex::FrameComposer&>())
-                .def("stroke_rect", &Telex::FrameComposer::strokeRect)
-                .def("clear_rect", &Telex::FrameComposer::clearRect)
-                .def("fill_rect", &Telex::FrameComposer::fillRect)
+                .def("stroke_rect", [](Telex::FrameComposer* fc, const RectF& r) {fc->strokeRect(r);})
+                .def("clear_rect", [](Telex::FrameComposer* fc, const RectF& r) {fc->clearRect(r);})
+                .def("fill_rect", [](Telex::FrameComposer* fc, const RectF& r) {fc->fillRect(r);})
                 .def("fill_text", &Telex::FrameComposer::fillText)
                 .def("stroke_text", &Telex::FrameComposer::strokeText)
                 .def("arc", &Telex::FrameComposer::arc)
@@ -226,7 +223,7 @@ PYBIND11_MODULE(Telex, m) {
                 .def("bezier_curve_to", &Telex::FrameComposer::bezierCurveTo)
                 .def("quadratic_curve_to", &Telex::FrameComposer::quadraticCurveTo)
                 .def("arc_to", &Telex::FrameComposer::arcTo)
-                .def("rect", &Telex::FrameComposer::rect)
+                .def("rect", [](Telex::FrameComposer* fc, const RectF& r) {fc->rect(r);})
                 .def("stroke", &Telex::FrameComposer::stroke)
                 .def("fill", &Telex::FrameComposer::fill)
                 .def("fill_style", &Telex::FrameComposer::fillStyle)
@@ -240,8 +237,8 @@ PYBIND11_MODULE(Telex, m) {
                 .def("translate", &Telex::FrameComposer::translate)
                 .def("scale", &Telex::FrameComposer::scale)
                 .def("draw_image", py::overload_cast<const std::string&, double, double>(&Telex::FrameComposer::drawImage))
-                .def("draw_image_rect", py::overload_cast<const std::string&, const Telex::Element::Rect&>(&Telex::FrameComposer::drawImage))
-                .def("draw_image_clip", py::overload_cast<const std::string&, const Telex::Element::Rect&, const Telex::Element::Rect&>(&Telex::FrameComposer::drawImage))
+                .def("draw_image_rect", [](Telex::FrameComposer* fc, const std::string& id, const RectF& r) {fc->drawImage(id, r);})
+                .def("draw_image_clip", [](Telex::FrameComposer* fc, const std::string& id, const RectF& c, const RectF& r){fc->drawImage(id, c, r);})
                 .def("composed", &Telex::FrameComposer::composed)
-                ;*/
+                ;
 }
