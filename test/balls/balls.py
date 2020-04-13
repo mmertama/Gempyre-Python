@@ -102,6 +102,23 @@ class Bullet:
         g.draw_image_rect(image, Telex.Rect(self.x, self.y, self.width, self.height))
 
 
+class Gun:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.angle = 0
+        self.width = 100
+
+    def draw(self, g, dome_image, barrel_image):
+        g.draw_image_rect(dome_image, Telex.Rect(self.x - 50, self.y - 50, 100, 50))
+        g.save()
+        g.translate(self.x, self.y - 20)
+        g.rotate(self.angle)
+        g.translate(-self.x, -(self.y - 20))
+        g.draw_image_rect(barrel_image, Telex.Rect(self.x - 5, self.y - 90, 10, 40))
+        g.restore()
+
+
 class Game:
     def __init__(self, ui, canvas, images):
         self.ui = ui
@@ -117,8 +134,8 @@ class Game:
         self.bullets = []
         self.monsters = []
         self.rect = None
-        self.angle = 0
         self.numberDrawer = None
+        self.gun = None
 
     @staticmethod
     def _get(name, images):
@@ -132,6 +149,7 @@ class Game:
         self.width = self.rect.width
         self.height = self.rect.height
         self.numberDrawer = Number(self.numbers)
+        self.gun = Gun(self.width / 2, self.height - 10)
 
     def create_monster(self, x_pos):
         self.monsters.append(Monster(x_pos, -40, 40, 40, random.randint(1, 99), self.numberDrawer))
@@ -178,23 +196,20 @@ class Game:
                     break
             if is_ok:
                 self.create_monster(x_pos)
-
-        fc.draw_image_rect(self.dome, Telex.Rect(self.width / 2 - 50, self.height - 60, 100, 50))
-        fc.save()
-        fc.translate(self.width / 2, self.width - 30)
-        fc.rotate(self.angle)
-        fc.translate(-(self.width / 2), -(self.width - 30))
-        fc.draw_image_rect(self.barrel, Telex.Rect(self.width / 2 - 5, self.width - 100, 10, 40))
-        fc.restore()
+        self.gun.draw(fc, self.dome, self.barrel)
         self.canvas.draw_frame(fc)
 
     def shoot(self):
-        start_x = (self.width / 2 - 10) + 110 * math.sin(self.angle)
-        start_y = (self.width - 30 - 10) - 110 * math.cos(self.angle)
-        self.bullets.append(Bullet(math.pi - self.angle, start_x, start_y, 20, 20))
+        start_x = (self.gun.x - 10) + 110 * math.sin(self.gun.angle)
+        start_y = (self.width - 30 - 10) - 110 * math.cos(self.gun.angle)
+        self.bullets.append(Bullet(math.pi - self.gun.angle, start_x, start_y, 20, 20))
 
     def turret(self, angle):
-        self.angle = angle
+        self.gun.angle = angle
+
+    def gun_move(self, x):
+        if (self.gun.x - (self.gun.width / 2) + x > 0) and (self.gun.x + (self.gun.width / 2) + x < self.width):
+            self.gun.x += x
 
 
 def main():
@@ -227,9 +242,18 @@ def main():
             return math.atan2((game.rect.height - y), mid_x - x) - math.pi / 2
         return 0
 
-    canvas.subscribe("mousemove", lambda e: game.turret(get_property(e)),
+    canvas.subscribe('mousemove', lambda e: game.turret(get_property(e)),
                      ["clientX", "clientY"], timedelta(milliseconds=100))
 
+    def key_listen(e):
+        code = int(float((e.properties['keyCode'])))
+        if code == ord('Z') or code == 37: #left arrow
+            game.gun_move(-2)
+        if code == ord('X') or code == 39: #right arrow
+            game.gun_move(2)
+
+    # canvas is not focusable therefore we listen whole app
+    ui.root().subscribe('keydown', key_listen, ['keyCode'])
     ui.run()
 
 
