@@ -7,12 +7,48 @@
   <meta http-equiv="Expires" content="0" />
   <title>Balls</title>
 </head>
-<body style="background-color:yellow";>
+<style>
+body {
+  background-color:darkgrey;
+}
+canvas {
+  background-color:grey;
+  width: 700px;
+}
+#left {
+  width: 800px;
+  float:left;
+  position:relative;
+}
+
+#instructions {
+  position: absolute;
+  left: 200px;
+  top: 100px;
+  width: 300px;
+}
+
+</style>
+<body>
   <script src="/telex.js"></script>
   <h1>Space Balls Invanders</h1>
-  <canvas id="canvas" width=800 height=800 style="background-color: violet">
-  </canvas>
-  <!--button id="shoot">Shoot</button-->
+  <h5 id="hit_header">Hits: <div span id="hits"></div></h5>
+  <div id="left">
+    <canvas id="canvas" width=700 height=700>
+    </canvas>
+      <div  id="instructions">
+        <h2 id="game_over">Game over!</h2>
+      <ul>
+          <li> &larr; Turret left </li>
+          <li>&rarr; Turret right </li>
+          <li>Z pipe left </li>
+          <li>X pipe right </li>
+          <li>C shoot </li>
+          <li> Shoot until they vanish, or hit the ground. Your turret can bounce the ammo back.</li>
+      </ul>
+        <h3>C or Click to go!</h3>
+    </div>
+  </div>
 </body>
 </html>
 

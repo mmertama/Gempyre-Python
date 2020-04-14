@@ -7,17 +7,35 @@ import Telex
 from Telex_utils import resource
 
 
+MONSTER_SPEED = 0.15
+BULLET_SPEED = 1.0
+GUN_SPEED = 5.0
+NUMBERS_WIDTH = 13
+NUMBERS_HEIGHT = 25
+BULLET_WIDTH = 20
+BULLET_HEIGHT = 20
+GUN_HEIGHT = 50
+GUN_WIDTH = 100
+BARREL_WIDTH = 10
+BARREL_HEIGHT = 40
+MONSTER_WIDTH = 40
+MONSTER_HEIGHT = 40
+TURRET_STEP = 0.01
+MAX_AMMO = 100
+
+
 class Number:
     def __init__(self, images):
         self.images = images
 
     def draw(self, g, x, y, width, height, value):
-        g.draw_image_clip(self.images, Telex.Rect(13 * value, 0, 13, 25), Telex.Rect(x, y, width, height))
+        g.draw_image_clip(self.images, Telex.Rect(
+                NUMBERS_WIDTH * value, 0, NUMBERS_WIDTH, NUMBERS_HEIGHT), Telex.Rect(x, y, width, height))
 
 
 class Monster:
     def __init__(self, x, y, width, height, endurance, numbers):
-        self.speed = 1.0
+        self.speed = MONSTER_SPEED
         self.x = x
         self.y = y
         self.width = width
@@ -41,7 +59,7 @@ class Monster:
 
 class Bullet:
     def __init__(self, direction, x, y, width, height):
-        self.speed = 2.0
+        self.speed = BULLET_SPEED
         self.x = x
         self.y = y
         self.width = width
@@ -70,19 +88,18 @@ class Bullet:
             return True
         return False
 
-    def test_hit(self, other):
-        ox = other.x + other.width
+    def test_hit(self, other, offset=0):
+        x = other.x + offset
+        ox = x + other.width
         oy = other.y + other.height
         sx = self.x + self.width
         sy = self.y + self.height
 
-        mx = self.x + self.step_x < ox and sx + self.step_x > other.x and (self.y < oy and sy > other.y)
-        my = self.y + self.step_y < oy and sy + self.step_y > other.y and (self.x < ox and sx > other.x)
-
+        mx = self.x + self.step_x < ox and sx + self.step_x > x and (self.y < oy and sy > other.y)
+        my = self.y + self.step_y < oy and sy + self.step_y > other.y and (self.x < ox and sx > x)
         has_hit = False
-
         if mx and my and not self.hit_in:
-            dx = min(sx, ox) - max(other.x, self.x)
+            dx = min(sx, ox) - max(x, self.x)
             dy = min(sy, oy) - max(other.y, self.y)
             if dx < dy:
                 my = False
@@ -107,16 +124,33 @@ class Gun:
         self.x = x
         self.y = y
         self.angle = 0
-        self.width = 100
+        self.width = GUN_WIDTH
+        self.height = GUN_HEIGHT
 
     def draw(self, g, dome_image, barrel_image):
-        g.draw_image_rect(dome_image, Telex.Rect(self.x - 50, self.y - 50, 100, 50))
+        g.draw_image_rect(dome_image, Telex.Rect(self.x - GUN_WIDTH / 2, self.y - GUN_HEIGHT, GUN_WIDTH, GUN_HEIGHT))
         g.save()
         g.translate(self.x, self.y - 20)
         g.rotate(self.angle)
         g.translate(-self.x, -(self.y - 20))
-        g.draw_image_rect(barrel_image, Telex.Rect(self.x - 5, self.y - 90, 10, 40))
+        g.draw_image_rect(barrel_image, Telex.Rect(
+            self.x - BARREL_WIDTH / 2, self.y - (GUN_WIDTH * 0.9), BARREL_WIDTH, BARREL_HEIGHT))
         g.restore()
+
+
+class Ammo:
+    def __init__(self, width, y_pos, count):
+        self.width = width
+        self.y_pos = y_pos
+        self.count = count
+        self.max = count
+        self.gap = width / count - BULLET_WIDTH
+
+    def draw(self, g, image):
+        pos = (self.gap + BULLET_WIDTH) * (self.max - self.count)
+        for i in range(0, self.count):
+            g.draw_image_rect(image, Telex.Rect(pos, self.y_pos, BULLET_WIDTH, BULLET_HEIGHT))
+            pos += self.gap + BULLET_WIDTH
 
 
 class Game:
@@ -136,6 +170,9 @@ class Game:
         self.rect = None
         self.numberDrawer = None
         self.gun = None
+        self.ammo = None
+        self.tick = None
+        self.hits = 0
 
     @staticmethod
     def _get(name, images):
@@ -149,14 +186,29 @@ class Game:
         self.width = self.rect.width
         self.height = self.rect.height
         self.numberDrawer = Number(self.numbers)
-        self.gun = Gun(self.width / 2, self.height - 10)
+        self.gun = Gun(self.width / 2, self.height - BULLET_HEIGHT - 4)
+        self.ammo = Ammo(self.width, self.height - BULLET_HEIGHT - 2, MAX_AMMO)
 
     def create_monster(self, x_pos):
-        self.monsters.append(Monster(x_pos, -40, 40, 40, random.randint(1, 99), self.numberDrawer))
+        self.monsters.append(Monster(
+            x_pos, -MONSTER_HEIGHT, MONSTER_WIDTH, MONSTER_HEIGHT, random.randint(1, 99), self.numberDrawer))
 
     def start(self):
-        self.ui.start_timer(timedelta(milliseconds=50), False, self.game_loop)
-        self.create_monster(random.randint(0, self.width - 40))
+        self.monsters = []
+        self.bullets = []
+        self.ammo.count = MAX_AMMO
+        self.hits = 0
+        Telex.Element(self.ui, "game_over").set_attribute("style", "visibility:hidden")
+        Telex.Element(self.ui, "hits").set_html(str(self.hits))
+        Telex.Element(self.ui, "instructions").set_attribute("style", "visibility:hidden")
+        self.tick = self.ui.start_timer(timedelta(milliseconds=50), False, self.game_loop)
+        self.create_monster(random.randint(0, self.width - MONSTER_WIDTH))
+
+    def game_over(self):
+        self.ui.stop_timer(self.tick);
+        self.tick = None
+        Telex.Element(self.ui, "game_over").set_attribute("style", "visibility:visible")
+        Telex.Element(self.ui, "instructions").set_attribute("style", "visibility:visible")
 
     def game_loop(self):
         fc = Telex.FrameComposer()
@@ -169,12 +221,23 @@ class Game:
                 self.bullets.remove(bullet)
             else:
                 bullet.step()
+
+                bullet.test_hit(self.gun, -GUN_WIDTH / 2)
+
                 for monster in self.monsters:
                     if bullet.test_hit(monster):
                         monster.endurance -= 1
+                        self.hits += 1
+                        Telex.Element(self.ui, "hits").set_html(str(self.hits))
                         if monster.endurance <= 0:
                             self.monsters.remove(monster)
+                            if self.ammo.count < self.ammo.max:
+                                self.ammo.count += 1
+
                     bullet.step()
+                    if (monster.y + monster.height) > (self.height - BULLET_HEIGHT):
+                        self.game_over()
+                        return
                 bullet.draw(fc, self.bullet)
 
         gaps = []
@@ -188,27 +251,38 @@ class Game:
                 self.monsters.remove(monster)
 
         if random.randint(0, 50) == 5:
-            x_pos = random.randint(0, self.width - 40)
+            x_pos = random.randint(0, self.width - MONSTER_WIDTH)
             is_ok = True
             for x in gaps:
-                if (x_pos > x) and (x_pos < x + 40):
+                if (x_pos > x) or (x_pos < x + MONSTER_WIDTH):
                     is_ok = False
                     break
             if is_ok:
                 self.create_monster(x_pos)
         self.gun.draw(fc, self.dome, self.barrel)
+        self.ammo.draw(fc, self.bullet)
         self.canvas.draw_frame(fc)
 
     def shoot(self):
-        start_x = (self.gun.x - 10) + 110 * math.sin(self.gun.angle)
-        start_y = (self.width - 30 - 10) - 110 * math.cos(self.gun.angle)
-        self.bullets.append(Bullet(math.pi - self.gun.angle, start_x, start_y, 20, 20))
+        if not self.tick:
+            self.start()
+            return
+
+        if self.ammo.count > 0:
+            start_x = (self.gun.x - 10) + 110 * math.sin(self.gun.angle)
+            start_y = (self.width - 30 - 10) - 110 * math.cos(self.gun.angle)
+            self.bullets.append(Bullet(math.pi - self.gun.angle, start_x, start_y, BULLET_WIDTH, BULLET_HEIGHT))
+            self.ammo.count -= 1
 
     def turret(self, angle):
-        self.gun.angle = angle
+        if angle > -math.pi and angle - math.pi:
+            self.gun.angle = angle
+
+    def turret_turn(self, angle):
+        self.turret(self.gun.angle + angle)
 
     def gun_move(self, x):
-        if (self.gun.x - (self.gun.width / 2) + x > 0) and (self.gun.x + (self.gun.width / 2) + x < self.width):
+        if (self.gun.x - (GUN_WIDTH / 2) + x > 0) and (self.gun.x + (GUN_WIDTH / 2) + x < self.width):
             self.gun.x += x
 
 
@@ -224,21 +298,24 @@ def main():
         urls.append(names[full_paths[i]])
 
     ui = Telex.Ui(data_map, names[full_paths[0]])
+
+    Telex.Element(ui, "game_over").set_attribute("style", "visibility:hidden")
+
     canvas = Telex.CanvasElement(ui, 'canvas')
 
-    images = canvas.add_images(urls, lambda _: game.start())
+    images = canvas.add_images(urls, None)
     game = Game(ui, canvas, zip(files[1:], images))
 
-    canvas.subscribe("click", lambda _: game.shoot())
-
     ui.on_open(lambda: game.init())
+
+    canvas.subscribe("click", lambda _: game.shoot())
 
     def get_property(event):
         if event:
             nonlocal game
             x = float(event.properties["clientX"])
             y = float(event.properties["clientY"])
-            mid_x = game.rect.width / 2
+            mid_x = game.gun.x
             return math.atan2((game.rect.height - y), mid_x - x) - math.pi / 2
         return 0
 
@@ -247,10 +324,16 @@ def main():
 
     def key_listen(e):
         code = int(float((e.properties['keyCode'])))
-        if code == ord('Z') or code == 37: #left arrow
-            game.gun_move(-2)
-        if code == ord('X') or code == 39: #right arrow
-            game.gun_move(2)
+        if code == 37: #left arrow
+            game.gun_move(-GUN_SPEED)
+        elif code == 39: #right arrow
+            game.gun_move(GUN_SPEED)
+        elif code == ord('Z'):
+            game.turret_turn(-TURRET_STEP)
+        elif code == ord('X'):
+            game.turret_turn(TURRET_STEP)
+        elif code == ord('C'):
+            game.shoot()
 
     # canvas is not focusable therefore we listen whole app
     ui.root().subscribe('keydown', key_listen, ['keyCode'])
