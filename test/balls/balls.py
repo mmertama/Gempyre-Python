@@ -3,7 +3,6 @@ import os
 import math
 import random
 from datetime import timedelta
-from datetime import datetime
 import Telex
 from Telex_utils import resource
 
@@ -23,7 +22,7 @@ MONSTER_WIDTH = 40
 MONSTER_HEIGHT = 40
 TURRET_STEP = 0.01
 MAX_AMMO = 100
-MAX_GAME_SPEED = 50
+GAME_SPEED = 50
 
 
 class Number:
@@ -105,70 +104,6 @@ class Bullet:
             d_dir |= self.BOTTOM
         return d_dir
 
-    '''
-    def test_hit(self, other):
-        ox = other.x + other.width
-        oy = other.y + other.height
-        sx = self.x + BULLET_WIDTH
-        sy = self.y + BULLET_HEIGHT
-        '''
-    '''
-        if (self.x < ox and sx > other.x) and (self.y < oy and sy > other.y): #already in!
-            dx1 = ox - self.x
-            dx2 = sx - other.x
-            dy1 = oy - self.y
-            dy2 = sy - other.y
-
-            if self.step_x > self.step_y:
-                if dx1 < dx2:
-                    self.x += dx1
-                else:
-                    self.x -= dx2
-            else:
-                if dy1 < dy2:
-                    self.y += dy1
-                else:
-                    self.y -= dy2
-    '''
-    '''
-        hit_x = self.x + self.step_x < ox + other.step_x and sx + self.step_x > other.x + other.step_x and (self.y < oy and sy > other.y)
-        hit_y = self.y + self.step_y < oy + other.step_y and sy + self.step_y > other.y + other.step_y and (self.x < ox and sx > other.x)
-
-        real_hit = False
-        if not self.hit_in:
-            hit_x_purified = hit_x
-            hit_y_purified = hit_x
-            dx = None
-            dy = None
-            if hit_x and hit_y:
-                dx = min(sx, ox) - max(other.x, self.x)
-                dy = min(sy, oy) - max(other.y, self.y)
-
-                if dx < dy:
-                    hit_y_purified = False
-                else:
-                    hit_x_purified = False
-
-            if hit_x or hit_y:
-                print("bouncex", datetime.utcnow().strftime('%S.%f')[:-2], dx, self.step_x, hit_x_purified, hit_x)
-                print("bouncey", datetime.utcnow().strftime('%S.%f')[:-2], dy, self.step_y, hit_y_purified, hit_y)
-
-            if hit_x_purified:
-                self.step_x *= -1.0
-                self.hit_in = True
-                real_hit = True
-            if hit_y_purified:
-                self.step_y *= -1.0
-                self.hit_in = True
-                real_hit = True
-        else:
-            self.hit_in = hit_x or hit_y
-            if not self.hit_in:
-                print ("Bounce change")
-
-        return real_hit
-    '''
-
     def test_hit(self, other):
         ox = other.x + other.width
         oy = other.y + other.height
@@ -183,17 +118,6 @@ class Bullet:
             b = (self.y + BULLET_HEIGHT) - (other.y + other.height)
             sx = self.step_x + other.step_x
             sy = self.step_y + other.step_y
-            '''
-            if l < 0 and sx < 0:
-                self.x += l
-            elif r > 0 and sx > 0:
-                self.x += r
-
-            if t < 0 and sy < 0:
-                self.y += t
-            elif b > 0 and sy > 0:
-                self.y += b
-            '''
             inside = self.is_inside(other)
 
             self.hit_in = other
@@ -256,12 +180,12 @@ class Gun:
 
 
 class Ammo:
-    def __init__(self, width, y_pos, count):
+    def __init__(self, width, y_pos):
         self.width = width
         self.y_pos = y_pos
-        self.count = count
-        self.max = count
-        self.gap = width / count - BULLET_WIDTH
+        self.count = MAX_AMMO
+        self.max = MAX_AMMO
+        self.gap = width / MAX_AMMO - BULLET_WIDTH
 
     def draw(self, g, image):
         pos = (self.gap + BULLET_WIDTH) * (self.max - self.count)
@@ -290,8 +214,10 @@ class Game:
         self.ammo = None
         self.tick = None
         self.hits = 0
-        self.game_speed = MAX_GAME_SPEED
-        self.game_speed_timer = None
+        self.game_speed = GAME_SPEED
+        self.wave = 0
+        self.wave_count = 0
+        self.restart = True
 
     @staticmethod
     def _get(name, images):
@@ -306,39 +232,47 @@ class Game:
         self.height = self.rect.height
         self.numberDrawer = Number(self.numbers)
         self.gun = Gun(self.width / 2, self.height - BULLET_HEIGHT - 4)
-        self.ammo = Ammo(self.width, self.height - BULLET_HEIGHT - 2, MAX_AMMO)
+        self.ammo = Ammo(self.width, self.height - BULLET_HEIGHT - 2)
 
     def create_monster(self, x_pos):
         self.monsters.append(Monster(
             x_pos, -MONSTER_HEIGHT, MONSTER_WIDTH, MONSTER_HEIGHT, random.randint(1, 99), self.numberDrawer))
 
     def start(self):
+        if self.tick:
+            return
+        if self.restart:
+            self.hits = 0
+            self.wave = 0
+            self.game_speed = GAME_SPEED
+            self.restart = False
+        self.ammo.count = MAX_AMMO
+        self.wave_count = 3 + self.wave * 1.5
         self.monsters = []
         self.bullets = []
         self.ammo.count = MAX_AMMO
-        self.hits = 0
         Telex.Element(self.ui, "game_over").set_attribute("style", "visibility:hidden")
+        Telex.Element(self.ui, "wave_end").set_attribute("style", "visibility:hidden")
         Telex.Element(self.ui, "hits").set_html(str(self.hits))
+        Telex.Element(self.ui, "waves").set_html(str(self.wave + 1))
+        Telex.Element(self.ui, "monsters").set_html(str(int(self.wave_count + 0.5)))
         Telex.Element(self.ui, "instructions").set_attribute("style", "visibility:hidden")
         self.tick = self.ui.start_timer(timedelta(milliseconds=TICK_SPEED), False, self.game_loop)
-        #self.create_monster(random.randint(0, self.width - MONSTER_WIDTH))
-        #self.create_monster(random.randint(0, self.width - MONSTER_WIDTH))
-        self.game_speed = MAX_GAME_SPEED
-
-    #   def dec():
-    #       if self.game_speed > 5:
-    #           self.game_speed -= 5
-
-    #   self.game_speed_timer = self.ui.start_timer(
-    #       timedelta(seconds=3), False, dec)
+        if self.game_speed > GAME_SPEED / 10:
+            self.game_speed -= 1
 
     def game_over(self):
         self.ui.stop_timer(self.tick);
-        #   self.ui.stop_timer(self.game_speed_timer)
-        self.game_speed_timer = None
         self.tick = None
         Telex.Element(self.ui, "game_over").set_attribute("style", "visibility:visible")
         Telex.Element(self.ui, "instructions").set_attribute("style", "visibility:visible")
+        self.restart = True
+
+    def wave_end(self):
+        self.ui.stop_timer(self.tick);
+        self.tick = None
+        Telex.Element(self.ui, "wave_end").set_attribute("style", "visibility:visible")
+        self.wave += 1
 
     def game_loop(self):
         fc = Telex.FrameComposer()
@@ -362,6 +296,9 @@ class Game:
                         if monster.endurance <= 0:
                             bullet.hit_in = None
                             self.monsters.remove(monster)
+                            if len(self.monsters) == 0:
+                                self.wave_end()
+                                return
                             if self.ammo.count < self.ammo.max:
                                 self.ammo.count += 1
 
@@ -381,27 +318,29 @@ class Game:
                 self.game_over()
                 return
 
-        if random.randint(0, self.game_speed) == 1:
-            x_pos = random.randint(0, self.width - MONSTER_WIDTH)
-            is_ok = True
-            for x in gaps:
-                if (x_pos > x) or (x_pos < x + MONSTER_WIDTH):
-                    is_ok = False
-                    break
-            if is_ok:
-                self.create_monster(x_pos)
+        if self.wave_count > 0:
+            if random.randint(0, self.game_speed) == 1:
+                x_pos = random.randint(0, self.width - MONSTER_WIDTH)
+                is_ok = True
+                for x in gaps:
+                    if (x_pos > x) or (x_pos < x + MONSTER_WIDTH):
+                        is_ok = False
+                        break
+                if is_ok:
+                    self.create_monster(x_pos)
+                    self.wave_count -= 1
+
         self.gun.draw(fc, self.dome, self.barrel)
         self.ammo.draw(fc, self.bullet)
         self.canvas.draw_frame(fc)
 
     def shoot(self):
         if not self.tick:
-            self.start()
             return
 
         if self.ammo.count > 0:
-            start_x = (self.gun.mx - 10) + 110 * math.sin(self.gun.angle)
-            start_y = (self.width - 30 - 10) - 110 * math.cos(self.gun.angle)
+            start_x = (self.gun.mx - 10) + 80 * math.sin(self.gun.angle)
+            start_y = (self.height - 40 - 10) - 80 * math.cos(self.gun.angle)
             self.bullets.append(Bullet(math.pi - self.gun.angle, start_x, start_y))
             self.ammo.count -= 1
 
@@ -430,6 +369,7 @@ def main():
     ui = Telex.Ui(data_map, names[full_paths[0]])
 
     Telex.Element(ui, "game_over").set_attribute("style", "visibility:hidden")
+    Telex.Element(ui, "wave_end").set_attribute("style", "visibility:hidden")
 
     canvas = Telex.CanvasElement(ui, 'canvas')
 
@@ -464,6 +404,8 @@ def main():
             game.turret_turn(TURRET_STEP)
         elif code == ord('C'):
             game.shoot()
+        elif code == ord('A'):
+            game.start()
 
     # canvas is not focusable therefore we listen whole app
     ui.root().subscribe('keydown', key_listen, ['keyCode'])
