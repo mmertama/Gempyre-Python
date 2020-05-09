@@ -21,3 +21,4 @@ build
 *.pyc
 _deps
 .idea
+Telex.cp38-win_amd64.pyd 

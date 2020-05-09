@@ -58,7 +58,8 @@ Telex is C++ Framework for quick and simple UI development and Telex-Python appl
 ''',
       packages = find_packages(),
       ext_modules = [CMakeExtension('Telex')],
-      cmdclass = {'build_ext': CMakeBuild}
+      cmdclass = {'build_ext': CMakeBuild},
+      setup_requires = ['wheel']
   #    setup_requires=['wheel', 'sdist']
       )
        
