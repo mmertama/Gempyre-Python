@@ -16,7 +16,7 @@ def from_file_list(lst):
         with open(inName, 'rb') as infile:
             content = infile.read()
             encoded = base64.standard_b64encode(content).decode('utf-8')
-        sname = '/' + re.sub('[^a-zA-Z_.]', '', os.path.basename(inName)).capitalize()
+        sname = '/' + re.sub('[^a-zA-Z_.]', '', os.path.basename(inName)) # why this was capitalize()?
         data[sname] = encoded
         names[inName] = sname
     return data, names
