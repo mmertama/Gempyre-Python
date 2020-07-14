@@ -72,7 +72,8 @@ PYBIND11_MODULE(Telex, m) {
                  return el->subscribe(name, [handler](const Telex::Event& ev){py::gil_scoped_acquire acquire; handler(ev);}, properties, throttle);
                 }, py::arg("name"), py::arg("handler"), py::arg("properties") = std::vector<std::string>{}, py::arg("throttle") = 0ms)
             .def("set_html", &Telex::Element::setHTML)
-            .def("set_attribute", &Telex::Element::setAttribute)
+            .def("set_attribute", &Telex::Element::setAttribute, py::arg("attr"), py::arg("value") = "")
+            .def("remove_attribute", &Telex::Element::removeAttribute)
             .def("attributes", &Telex::Element::attributes)
             .def("children", &Telex::Element::children)
             .def("values", &Telex::Element::values)
@@ -197,9 +198,6 @@ PYBIND11_MODULE(Telex, m) {
                 .def("width", &Telex::Graphics::width)
                 .def("height", &Telex::Graphics::height)
                 .def("draw_rect", [](Telex::Graphics* g, const RectF& r, Telex::Color::type c) {g->drawRect(r, c);})
-
-//               .def("draw_rect", &Telex::Graphics::drawRect)
-
                 .def("merge", &Telex::Graphics::merge)
                 .def("swap", &Telex::Graphics::swap)
                 .def("update", &Telex::Graphics::update)
