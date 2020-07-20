@@ -140,10 +140,16 @@ PYBIND11_MODULE(Telex, m) {
         .def("alert", &Telex::Ui::alert)
         .def("open", &Telex::Ui::open, py::arg("url"), py::arg("name") = "")
         .def("start_timer", [](Telex::Ui* ui, const std::chrono::milliseconds& ms, bool b, const std::function<void ()>& f) {
-            return ui->startTimer(ms, b, [f](){py::gil_scoped_acquire acquire; f();});})
+            return ui->startTimer(ms, b, [f](){
+                py::gil_scoped_acquire acquire;
+                f();
+            });})
         // When wrapping in fp (to enable GIL), there is no need: py::overload_cast<const std::chrono::milliseconds&, bool, const std::function<void (Telex::Ui::TimerId)>&>(&Telex::Ui::startTimer)
-        .def("start_timer", [](Telex::Ui* ui, const std::chrono::milliseconds& ms, bool b, const std::function<void (Telex::Ui::TimerId)>& f) {
-            return ui->startTimer(ms, b, [f](Telex::Ui::TimerId tid){py::gil_scoped_acquire acquire; f(tid);});})
+        .def("start_timer_id", [](Telex::Ui* ui, const std::chrono::milliseconds& ms, bool b, const std::function<void (Telex::Ui::TimerId)>& f) {
+            return ui->startTimer(ms, b, [f](Telex::Ui::TimerId tid){
+                py::gil_scoped_acquire acquire;
+                f(tid);
+            });})
         .def("stop_timer", &Telex::Ui::stopTimer)
         .def("root", &Telex::Ui::root)
         .def("address_of", &Telex::Ui::addressOf)
