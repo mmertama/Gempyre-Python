@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.8)
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
+
+set(Python_ADDITIONAL_VERSIONS 3.8)
+find_package(Python COMPONENTS Interpreter Development)
+include_directories(${PYTHON_INCLUDE_PATH})
+find_program(PYTHON "python3" REQUIRED)
+
 include(GNUInstallDirs)
 include(ExternalProject)
 project(telexpy)
@@ -33,7 +39,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/README.md
 
 find_package (telex REQUIRED PATHS ../Telex-framework/telexlib)
 
-set(PYBIND11_PYTHON_VERSION 3.6)
+set(PYBIND11_PYTHON_VERSION 3.8)
 pybind11_add_module(Telex
     telex_python.cpp)
 
