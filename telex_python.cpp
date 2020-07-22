@@ -43,7 +43,15 @@ static  std::optional<std::string> TelexExtension(Telex::Ui* ui, const std::stri
 
 
 PYBIND11_MODULE(Telex, m) {
-    m.def("set_debug", &Telex::setDebug);
+    py::enum_<Telex::DebugLevel>(m, "DebugLevel")
+    .value("None", Telex::DebugLevel::None)
+    .value("Fatal", Telex::DebugLevel::Fatal)
+    .value("Error", Telex::DebugLevel::Error)
+    .value("Warning", Telex::DebugLevel::Warning)
+    .value("Info", Telex::DebugLevel::Info)
+    .value("Debug", Telex::DebugLevel::Debug)
+    .value("Debug_Trace", Telex::DebugLevel::Debug_Trace);
+    m.def("set_debug", &Telex::setDebug, py::arg("level") = Telex::DebugLevel::Debug);
     m.def("version", &Telex::version);
 
     py::class_<Telex::Event>(m, "Event")
@@ -69,7 +77,9 @@ PYBIND11_MODULE(Telex, m) {
             .def("ui", py::overload_cast<>(&Telex::Element::ui))
             .def("id", &Telex::Element::id)
             .def("subscribe", [](Telex::Element* el, const std::string& name, std::function<void(const Telex::Event& ev)> handler, const std::vector<std::string>& properties, const std::chrono::milliseconds& throttle = 0ms) {
-                 return el->subscribe(name, [handler](const Telex::Event& ev){py::gil_scoped_acquire acquire; handler(ev);}, properties, throttle);
+                 return el->subscribe(name, [handler](const Telex::Event& ev) {
+                     py::gil_scoped_acquire acquire; handler(ev);
+                 }, properties, throttle);
                 }, py::arg("name"), py::arg("handler"), py::arg("properties") = std::vector<std::string>{}, py::arg("throttle") = 0ms)
             .def("set_html", &Telex::Element::setHTML)
             .def("set_attribute", &Telex::Element::setAttribute, py::arg("attr"), py::arg("value") = "")
@@ -123,33 +133,47 @@ PYBIND11_MODULE(Telex, m) {
         .def("exit", &Telex::Ui::exit)
         .def("close", &Telex::Ui::close)
         .def("on_exit", [](Telex::Ui* ui, std::function<void ()> onExitFunction = nullptr)->Telex::Ui& {
-            return ui->onExit(onExitFunction ? [onExitFunction]() {py::gil_scoped_acquire acquire; return onExitFunction(); } :
-                static_cast<decltype(onExitFunction)>(nullptr)); })
+            return ui->onExit(onExitFunction ? [onExitFunction]() {
+                py::gil_scoped_acquire acquire;
+                return onExitFunction();
+            } : static_cast<decltype(onExitFunction)>(nullptr));
+        })
         .def("on_reload", [](Telex::Ui* ui, std::function<void ()> onReloadFunction = nullptr)->Telex::Ui& {
-        return ui->onReload(onReloadFunction ? [onReloadFunction]() {py::gil_scoped_acquire acquire; return onReloadFunction(); } :
-            static_cast<decltype(onReloadFunction)>(nullptr)); })
+        return ui->onReload(onReloadFunction ? [onReloadFunction]() {
+            py::gil_scoped_acquire acquire;
+            return onReloadFunction();
+        } : static_cast<decltype(onReloadFunction)>(nullptr));
+        })
         .def("on_open", [](Telex::Ui* ui, std::function<void ()> onOpenFunction = nullptr)->Telex::Ui& {
-        return ui->onOpen(onOpenFunction ? [onOpenFunction]() {py::gil_scoped_acquire acquire; return onOpenFunction(); } :
-            static_cast<decltype(onOpenFunction)>(nullptr)); })
+        return ui->onOpen(onOpenFunction ? [onOpenFunction]() {
+            py::gil_scoped_acquire acquire;
+            return onOpenFunction();
+        } : static_cast<decltype(onOpenFunction)>(nullptr));
+        })
         .def("on_error", [](Telex::Ui* ui, std::function<void (const std::string& element, const std::string& info)> onErrorFunction = nullptr)->Telex::Ui& {
-        return ui->onError(onErrorFunction ? [onErrorFunction](const std::string& element, const std::string& info) {py::gil_scoped_acquire acquire; return onErrorFunction(element, info); } :
-            static_cast<decltype(onErrorFunction)>(nullptr)); })
+            return ui->onError(onErrorFunction ? [onErrorFunction](const std::string& element, const std::string& info) {
+                py::gil_scoped_acquire acquire;
+                return onErrorFunction(element, info);
+            } : static_cast<decltype(onErrorFunction)>(nullptr));
+        })
         .def("set_logging", &Telex::Ui::setLogging)
         .def("eval", &Telex::Ui::eval)
         .def("debug", &Telex::Ui::debug)
         .def("alert", &Telex::Ui::alert)
         .def("open", &Telex::Ui::open, py::arg("url"), py::arg("name") = "")
         .def("start_timer", [](Telex::Ui* ui, const std::chrono::milliseconds& ms, bool b, const std::function<void ()>& f) {
-            return ui->startTimer(ms, b, [f](){
+            return ui->startTimer(ms, b, [f]() {
                 py::gil_scoped_acquire acquire;
                 f();
-            });})
+            });
+        })
         // When wrapping in fp (to enable GIL), there is no need: py::overload_cast<const std::chrono::milliseconds&, bool, const std::function<void (Telex::Ui::TimerId)>&>(&Telex::Ui::startTimer)
         .def("start_timer_id", [](Telex::Ui* ui, const std::chrono::milliseconds& ms, bool b, const std::function<void (Telex::Ui::TimerId)>& f) {
-            return ui->startTimer(ms, b, [f](Telex::Ui::TimerId tid){
+            return ui->startTimer(ms, b, [f](Telex::Ui::TimerId tid) {
                 py::gil_scoped_acquire acquire;
                 f(tid);
-            });})
+            });
+        })
         .def("stop_timer", &Telex::Ui::stopTimer)
         .def("root", &Telex::Ui::root)
         .def("address_of", &Telex::Ui::addressOf)
@@ -191,17 +215,17 @@ PYBIND11_MODULE(Telex, m) {
 
         py::class_<Telex::Graphics>(m, "Graphics")
                 .def(py::init<Telex::CanvasElement&, int, int>())
-                .def(py::init<Telex::CanvasElement&>())
+                //There is no makeCanvas... .def(py::init<Telex::CanvasElement&>())
                 .def(py::init<const Telex::Graphics&>())
                 .def("create", &Telex::Graphics::create)
                 .def("clone", &Telex::Graphics::clone)
                 .def_static("pix", &Telex::Graphics::pix, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF)
-                .def_property_readonly_static("Black", [](){return Telex::Graphics::Black;})
-                .def_property_readonly_static("White", [](){return Telex::Graphics::White;})
-                .def_property_readonly_static("Black", [](){return Telex::Graphics::Black;})
-                .def_property_readonly_static("Red", [](){return Telex::Graphics::Red;})
-                .def_property_readonly_static("Green", [](){return Telex::Graphics::Green;})
-                .def_property_readonly_static("Blue", [](){return Telex::Graphics::Blue;})
+                .def_property_readonly_static("Black", [](py::object){return Telex::Graphics::Black;})
+                .def_property_readonly_static("White", [](py::object){return Telex::Graphics::White;})
+                .def_property_readonly_static("Black", [](py::object){return Telex::Graphics::Black;})
+                .def_property_readonly_static("Red", [](py::object){return Telex::Graphics::Red;})
+                .def_property_readonly_static("Green", [](py::object){return Telex::Graphics::Green;})
+                .def_property_readonly_static("Blue", [](py::object){return Telex::Graphics::Blue;})
                 .def("set_pixel", &Telex::Graphics::setPixel)
                 .def("set_alpha", &Telex::Graphics::setAlpha)
                 .def("width", &Telex::Graphics::width)
