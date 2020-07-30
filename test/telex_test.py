@@ -1,23 +1,23 @@
 import sys
 import os
 import math
-import Telex
+import Gempyre
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
-from Telex_utils import resource
+from Gempyre_utils import resource
 
-Telex.set_debug(Telex.DebugLevel.Error)
+Gempyre.set_debug(Gempyre.DebugLevel.Error)
 name = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(sys.argv[0]), "python_test_1.html")
 map, names = resource.from_file(name)
 print(names[name], name)
 
-ui = Telex.Ui(map, names[name])
+ui = Gempyre.Ui(map, names[name])
 
-ver, major, minor = Telex.version()
-Telex.Element(ui, 'ver').set_html("Telex Version: " + str(ver) + '.' + str(major) + '.' + str(minor));
+ver, major, minor = Gempyre.version()
+Gempyre.Element(ui, 'ver').set_html("Gempyre Version: " + str(ver) + '.' + str(major) + '.' + str(minor));
 
-eyes = Telex.CanvasElement(ui, 'eyes')
+eyes = Gempyre.CanvasElement(ui, 'eyes')
 eyes_rect = None
 
 def on_start():
@@ -28,35 +28,35 @@ def on_start():
 ui.on_open(on_start)
 
 ui.start_timer(timedelta(seconds=1), False,
-               lambda: Telex.Element(ui,'time').set_html(
+               lambda: Gempyre.Element(ui,'time').set_html(
                    datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
 elementCount = 0
 
-addbutton = Telex.Element(ui, 'do')
+addbutton = Gempyre.Element(ui, 'do')
 def add_element(event):
     global elementCount
-    new = Telex.Element(ui, "name_" + str(elementCount), "img", ui.root())
+    new = Gempyre.Element(ui, "name_" + str(elementCount), "img", ui.root())
     elementCount += 1
     new.set_attribute("SRC", "https://www.animatedimages.org/data/media/202/animated-dog-image-0931.gif")
 
     
 addbutton.subscribe('click', add_element)
 
-removebutton = Telex.Element(ui, 'take')
+removebutton = Gempyre.Element(ui, 'take')
 
 def removeElement(event):
     global elementCount
     if elementCount <= 0:
         return
     elementCount -= 1
-    Telex.Element(ui, "name_" + str(elementCount)).remove()
+    Gempyre.Element(ui, "name_" + str(elementCount)).remove()
 removebutton.subscribe('click', removeElement)
 
 ui.on_exit(lambda: print("on Exit"))
 
-tick1 = Telex.Element(ui, 'tick1')
-tick2 = Telex.Element(ui, 'tick2')
+tick1 = Gempyre.Element(ui, 'tick1')
+tick2 = Gempyre.Element(ui, 'tick2')
 
 def toggle(e0, e1):
     if e0.values()['checked'] == 'true':
@@ -71,8 +71,8 @@ tick1.set_attribute('checked', 'true')
 
 
 def move_eyes(x, y):
-    fc = Telex.FrameComposer()
-    fc.clear_rect(Telex.Rect(0, 0, 80, 80))
+    fc = Gempyre.FrameComposer()
+    fc.clear_rect(Gempyre.Rect(0, 0, 80, 80))
     
     def draw_eye(fc, px, py, x, y):
         fc.begin_path()
@@ -98,8 +98,8 @@ ui.root().subscribe('mousemove', lambda e: move_eyes(float(e.properties['clientX
                                                      float(e.properties['clientY']) - eyes_rect.y),
                      ["clientX", "clientY"], timedelta(milliseconds=100))
 
-kitt_canvas = Telex.CanvasElement(ui, "kitt")
-g = Telex.Graphics(kitt_canvas, 200, 20)
+kitt_canvas = Gempyre.CanvasElement(ui, "kitt")
+g = Gempyre.Graphics(kitt_canvas, 200, 20)
 position = 1
 direction = 1
 
@@ -111,13 +111,13 @@ def draw_kitt():
         direction = -1
     if position <= 0:
         direction = 1;
-    g.draw_rect(Telex.Rect(0, 0, 200, 20), Telex.Graphics.Black)
+    g.draw_rect(Gempyre.Rect(0, 0, 200, 20), Gempyre.Graphics.Black)
     for i in range(0, 20):
-        g.set_pixel(position - 1, i, Telex.Graphics.Red)
+        g.set_pixel(position - 1, i, Gempyre.Graphics.Red)
     for i in range(0, 20):
-        g.set_pixel(position, i, Telex.Graphics.pix(0xFF, 0xFF, 0))
+        g.set_pixel(position, i, Gempyre.Graphics.pix(0xFF, 0xFF, 0))
     for i in range(0, 20):
-        g.set_pixel(position + 1, i, Telex.Graphics.Red)
+        g.set_pixel(position + 1, i, Gempyre.Graphics.Red)
     g.update()
     
 ui.start_timer(timedelta(milliseconds=10), False, draw_kitt)

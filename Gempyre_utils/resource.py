@@ -5,7 +5,7 @@ import os
 
 def from_file_list(lst):
     """
-    Generates a filemap for Telex
+    Generates a filemap for Gempyre
     :param lst: list of filenames.
     :return: two dictionaries, first is map second is to map it's keys to give arguments.
     """
@@ -24,7 +24,7 @@ def from_file_list(lst):
     
 def from_file(*argv):
     """
-    Generates a filemap for Telex
+    Generates a filemap for Gempyre
     :param argv: argument list of filenames.
     :return: two dictionaries, first is map second is to map it's keys to give arguments.
     """

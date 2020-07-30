@@ -9,7 +9,7 @@ find_program(PYTHON "python3" REQUIRED)
 
 include(GNUInstallDirs)
 include(ExternalProject)
-project(telexpy)
+project(gempyrepy)
 include(FetchContent)
 
 FetchContent_Declare(
@@ -23,7 +23,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-fPIC)
 
 include_directories(
-    ../Telex-framework/telexlib/include
+    ../Gempyre/gempyrelib/include
     )
 
 FetchContent_GetProperties(pybind11)
@@ -37,17 +37,17 @@ endif()
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/README.md
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-find_package (telex REQUIRED PATHS ../Telex-framework/telexlib)
+find_package (gempyre REQUIRED PATHS ../Gempyre/gempyrelib)
 
 set(PYBIND11_PYTHON_VERSION 3.8)
-pybind11_add_module(Telex
-    telex_python.cpp)
+pybind11_add_module(Gempyre
+    gempyre_python.cpp)
 
 add_custom_command(
-    TARGET Telex
+    TARGET Gempyre
     POST_BUILD
     COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
     )
 
-target_link_libraries(Telex PRIVATE telex)
+target_link_libraries(Gempyre PRIVATE gempyre)
 

@@ -3,8 +3,8 @@ import os
 import math
 import random
 from datetime import timedelta
-import Telex
-from Telex_utils import resource
+import Gempyre
+from Gempyre_utils import resource
 
 TICK_SPEED = 30
 MONSTER_SPEED = 0.15
@@ -30,8 +30,8 @@ class Number:
         self.images = images
 
     def draw(self, g, x, y, width, height, value):
-        g.draw_image_clip(self.images, Telex.Rect(
-            NUMBERS_WIDTH * value, 0, NUMBERS_WIDTH, NUMBERS_HEIGHT), Telex.Rect(x, y, width, height))
+        g.draw_image_clip(self.images, Gempyre.Rect(
+            NUMBERS_WIDTH * value, 0, NUMBERS_WIDTH, NUMBERS_HEIGHT), Gempyre.Rect(x, y, width, height))
 
 
 class Monster:
@@ -52,7 +52,7 @@ class Monster:
         return self.y + self.height > y + height
 
     def draw(self, g, image):
-        g.draw_image_rect(image, Telex.Rect(self.x, self.y, self.width, self.height))
+        g.draw_image_rect(image, Gempyre.Rect(self.x, self.y, self.width, self.height))
         f1 = int(self.endurance / 10)
         f2 = self.endurance - (f1 * 10)
         self.numbers.draw(g, self.x + 6, self.y + 6, 10, 10, f1)
@@ -147,7 +147,7 @@ class Bullet:
         return False
 
     def draw(self, g, image):
-        g.draw_image_rect(image, Telex.Rect(self.x, self.y, BULLET_WIDTH, BULLET_HEIGHT))
+        g.draw_image_rect(image, Gempyre.Rect(self.x, self.y, BULLET_WIDTH, BULLET_HEIGHT))
 
 
 class Gun:
@@ -163,12 +163,12 @@ class Gun:
         self.step_y = 0
 
     def draw(self, g, dome_image, barrel_image):
-        g.draw_image_rect(dome_image, Telex.Rect(self.mx - GUN_WIDTH / 2, self.my - GUN_HEIGHT, GUN_WIDTH, GUN_HEIGHT))
+        g.draw_image_rect(dome_image, Gempyre.Rect(self.mx - GUN_WIDTH / 2, self.my - GUN_HEIGHT, GUN_WIDTH, GUN_HEIGHT))
         g.save()
         g.translate(self.mx, self.my - 20)
         g.rotate(self.angle)
         g.translate(-self.mx, -(self.my - 20))
-        g.draw_image_rect(barrel_image, Telex.Rect(
+        g.draw_image_rect(barrel_image, Gempyre.Rect(
             self.mx - BARREL_WIDTH / 2, self.my - (GUN_WIDTH * 0.9), BARREL_WIDTH, BARREL_HEIGHT))
         g.restore()
 
@@ -190,7 +190,7 @@ class Ammo:
     def draw(self, g, image):
         pos = (self.gap + BULLET_WIDTH) * (self.max - self.count)
         for i in range(0, self.count):
-            g.draw_image_rect(image, Telex.Rect(pos, self.y_pos, BULLET_WIDTH, BULLET_HEIGHT))
+            g.draw_image_rect(image, Gempyre.Rect(pos, self.y_pos, BULLET_WIDTH, BULLET_HEIGHT))
             pos += self.gap + BULLET_WIDTH
 
 
@@ -251,12 +251,12 @@ class Game:
         self.monsters = []
         self.bullets = []
         self.ammo.count = MAX_AMMO
-        Telex.Element(self.ui, "game_over").set_attribute("style", "visibility:hidden")
-        Telex.Element(self.ui, "wave_end").set_attribute("style", "visibility:hidden")
-        Telex.Element(self.ui, "hits").set_html(str(self.hits))
-        Telex.Element(self.ui, "waves").set_html(str(self.wave + 1))
-        Telex.Element(self.ui, "monsters").set_html(str(int(self.wave_count + 0.5)))
-        Telex.Element(self.ui, "instructions").set_attribute("style", "visibility:hidden")
+        Gempyre.Element(self.ui, "game_over").set_attribute("style", "visibility:hidden")
+        Gempyre.Element(self.ui, "wave_end").set_attribute("style", "visibility:hidden")
+        Gempyre.Element(self.ui, "hits").set_html(str(self.hits))
+        Gempyre.Element(self.ui, "waves").set_html(str(self.wave + 1))
+        Gempyre.Element(self.ui, "monsters").set_html(str(int(self.wave_count + 0.5)))
+        Gempyre.Element(self.ui, "instructions").set_attribute("style", "visibility:hidden")
         self.tick = self.ui.start_timer(timedelta(milliseconds=TICK_SPEED), False, self.game_loop)
         if self.game_speed > GAME_SPEED / 10:
             self.game_speed -= 1
@@ -264,19 +264,19 @@ class Game:
     def game_over(self):
         self.ui.stop_timer(self.tick);
         self.tick = None
-        Telex.Element(self.ui, "game_over").set_attribute("style", "visibility:visible")
-        Telex.Element(self.ui, "instructions").set_attribute("style", "visibility:visible")
+        Gempyre.Element(self.ui, "game_over").set_attribute("style", "visibility:visible")
+        Gempyre.Element(self.ui, "instructions").set_attribute("style", "visibility:visible")
         self.restart = True
 
     def wave_end(self):
         self.ui.stop_timer(self.tick);
         self.tick = None
-        Telex.Element(self.ui, "wave_end").set_attribute("style", "visibility:visible")
+        Gempyre.Element(self.ui, "wave_end").set_attribute("style", "visibility:visible")
         self.wave += 1
 
     def game_loop(self):
-        fc = Telex.FrameComposer()
-        fc.clear_rect(Telex.Rect(0, 0, self.width, self.height))
+        fc = Gempyre.FrameComposer()
+        fc.clear_rect(Gempyre.Rect(0, 0, self.width, self.height))
 
         for bullet in self.bullets:
             bullet.step()
@@ -292,7 +292,7 @@ class Game:
                     if bullet.test_hit(monster):
                         monster.endurance -= 1
                         self.hits += 1
-                        Telex.Element(self.ui, "hits").set_html(str(self.hits))
+                        Gempyre.Element(self.ui, "hits").set_html(str(self.hits))
                         if monster.endurance <= 0:
                             bullet.hit_in = None
                             self.monsters.remove(monster)
@@ -366,12 +366,12 @@ def main():
     for i in range(1, len(full_paths)):
         urls.append(names[full_paths[i]])
 
-    ui = Telex.Ui(data_map, names[full_paths[0]])
+    ui = Gempyre.Ui(data_map, names[full_paths[0]])
 
-    Telex.Element(ui, "game_over").set_attribute("style", "visibility:hidden")
-    Telex.Element(ui, "wave_end").set_attribute("style", "visibility:hidden")
+    Gempyre.Element(ui, "game_over").set_attribute("style", "visibility:hidden")
+    Gempyre.Element(ui, "wave_end").set_attribute("style", "visibility:hidden")
 
-    canvas = Telex.CanvasElement(ui, 'canvas')
+    canvas = Gempyre.CanvasElement(ui, 'canvas')
 
     images = canvas.add_images(urls, None)
     game = Game(ui, canvas, zip(files[1:], images))
@@ -413,5 +413,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # Telex.set_debug()
+    # Gempyre.set_debug()
     main()

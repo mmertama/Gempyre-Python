@@ -47,17 +47,17 @@ class CMakeBuild(build_ext):
 
         
         
-setup (name = 'Telex',
+setup (name = 'Gempyre',
        version = '1.0.1',
-       description = 'Telex Framework',
+       description = 'Gempyre Framework',
        author = 'Markus Mertama',
        author_email = 'foobar@foobar',
        url = 'https://github.com/mmertama',
        long_description = '''
-Telex is C++ Framework for quick and simple UI development and Telex-Python apply that breeze to Python development.
+Gempyre is C++ Framework for quick and simple UI development and Gempyre-Python apply that breeze to Python development.
 ''',
       packages = find_packages(),
-      ext_modules = [CMakeExtension('Telex')],
+      ext_modules = [CMakeExtension('Gempyre')],
       cmdclass = {'build_ext': CMakeBuild},
       setup_requires = ['wheel']
   #    setup_requires=['wheel', 'sdist']
