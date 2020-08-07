@@ -1,15 +1,23 @@
 cmake_minimum_required(VERSION 3.8)
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
+project(gempyrepy LANGUAGES CXX C)
+
+if(NOT WIN32)
+	find_program(PYTHON "python3" REQUIRED)
+	set (PYTHON3 python3)
+else()
+	find_program(PYTHON "python" REQUIRED)
+	set (PYTHON3 python)
+endif() 
 
 set(Python_ADDITIONAL_VERSIONS 3.8)
 find_package(Python COMPONENTS Interpreter Development)
 include_directories(${PYTHON_INCLUDE_PATH})
-find_program(PYTHON "python3" REQUIRED)
+
 
 include(GNUInstallDirs)
 include(ExternalProject)
-project(gempyrepy)
 include(FetchContent)
 
 FetchContent_Declare(
@@ -46,7 +54,7 @@ pybind11_add_module(Gempyre
 add_custom_command(
     TARGET Gempyre
     POST_BUILD
-    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
+    COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
     )
 
 target_link_libraries(Gempyre PRIVATE gempyre)

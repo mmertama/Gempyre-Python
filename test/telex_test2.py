@@ -3,6 +3,7 @@ import os
 import subprocess
 import platform
 import shlex
+import psutil
 
 import Gempyre
 from Gempyre_utils import resource
@@ -32,6 +33,8 @@ for n in name:
 input = Gempyre.Element(ui, "command_line")
 output = Gempyre.Element(ui, "output")
 
+decoding = 'CP850' if psutil.Process(os.getpid()).parent().name() == 'cmd.exe' else 'utf-8'
+
 def do_run(ev):
     global input
     global output
@@ -39,8 +42,14 @@ def do_run(ev):
     if not value or len(value['value']) == 0:
         return
     command_line = shlex.split(value['value'])
-    out = subprocess.run(command_line, stdout=subprocess.PIPE).stdout.decode('utf-8')
-    output.set_html(out)   
+    
+    try:
+        out = subprocess.run(command_line, stdout=subprocess.PIPE, shell=True).stdout.decode(decoding)
+    except FileNotFoundError as e:
+         output.set_html(str(e))
+    else:
+        output.set_html(out)   
+               
 
 Gempyre.Element(ui, "run").subscribe('click', do_run)    
     
