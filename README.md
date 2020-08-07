@@ -2,7 +2,6 @@
 
 ## Build
 
-Clone Gempyre-framework (https://github.com/mmertama/Gempyre-framework.git)
 Build using cmake in OSX or Linux, for Windows run associated msvc_build.bat in MSVC x64 terminal)
 Clone Gempyre-Python (https://github.com/mmertama/Gempyre-Python.git)
 Build scripts are for spesific OS/Python versions - but they are only three lines and shall not be a problem. 
