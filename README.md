@@ -32,11 +32,9 @@ Then run some of the python scripts in test folder to if UI opens.
 The programming interface is very same as in Gempyre-framework (https://github.com/mmertama/Gempyre-framework.git) 
 - except I changed function and method names from CamelCase to more pythonic snake_case (Im not sure if that was a right choice, but its not a big deal).
 
-Please look  Gempyre-framework (https://github.com/mmertama/Gempyre-framework.git) for documentation.
+Please look  [Gempyre]) (https://github.com/mmertama/Gempyre.git) for documentation.
 
-Note that Gempyre-Utils is not implemented in Python, it has C++ utlitieis and thus that applicable for Python programmers.
-
-Otherwise Python-Core (https://github.com/mmertama/Gempyre-framework/blob/master/gempyre.md) 
-and Python-Graphics (https://github.com/mmertama/Gempyre-framework/blob/master/gempyre_graphics.md) are almost entirely available in Python.  
+Note that Gempyre-Utils is not implemented in Python, it has C++ utilites and thus not applicable for Python programmers as everything and more is already there!
+  
 
 
