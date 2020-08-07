@@ -2,10 +2,21 @@
 
 ## Build
 
-Clone Gempyre-framework (https://github.com/mmertama/Gempyre-framework.git)
-Build using cmake in OSX or Linux, for Windows run associated msvc_build.bat in MSVC x64 terminal)
+
+
 Clone Gempyre-Python (https://github.com/mmertama/Gempyre-Python.git)
-Build scripts are for spesific OS/Python versions - but they are only three lines and shall not be a problem. 
+
+Build scripts are for spesific OS/Python versions - but they are only three lines and shall not be a problem.
+
+### For Windows:
+* install git bash https://gitforwindows.org/
+* $ git clone https://github.com/mmertama/Gempyre.git
+* install cmake https://cmake.org/download/ (let it to be added in path)
+* install Visual Studio https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019
+		* pick Desktop development with C++
+* install Python 3.8 (3.6 >= shall be ok) https://www.python.org/downloads/windows/
+* Open x64 Native Tools Command Prompt for VS 2019
+* run msvc_build at Gempyre-Python folder
 
 For example Linux looks something like this
 <pre>

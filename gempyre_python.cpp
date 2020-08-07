@@ -51,7 +51,7 @@ PYBIND11_MODULE(Gempyre, m) {
     .value("Info", Gempyre::DebugLevel::Info)
     .value("Debug", Gempyre::DebugLevel::Debug)
     .value("Debug_Trace", Gempyre::DebugLevel::Debug_Trace);
-    m.def("set_debug", &Gempyre::setDebug, py::arg("level") = Gempyre::DebugLevel::Debug);
+    m.def("set_debug", &Gempyre::setDebug, py::arg("level") = Gempyre::DebugLevel::Debug, py::arg("useLog") = false);
     m.def("version", &Gempyre::version);
 
     py::class_<Gempyre::Event>(m, "Event")
