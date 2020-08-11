@@ -36,7 +36,7 @@ $ python3 test/python_test_1.html
 The programming interface is very same as in Gempyre-framework (https://github.com/mmertama/Gempyre-framework.git) 
 - except I changed function and method names from CamelCase to more pythonic snake_case (Im not sure if that was a right choice, but its not a big deal).
 
-Please look  [Gempyre]) (https://github.com/mmertama/Gempyre.git) for documentation.
+Please look  [Gempyre] (https://github.com/mmertama/Gempyre.git) for documentation.
 
 Please note that Gempyre Core and Gempyre Graphics are part of Python API, but not Gempyre-Utils, it has C++ utilites and thus not applicable for Python programmers as everything and more is already there!
   
