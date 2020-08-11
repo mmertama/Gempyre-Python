@@ -2,11 +2,16 @@
 
 ## Build
 
-
-
 Clone Gempyre-Python (https://github.com/mmertama/Gempyre-Python.git)
 
 Build scripts are for spesific OS/Python versions - but they are only three lines and shall not be a problem.
+
+For example Linux script looks something like this
+<pre>
+cmake --build . --config Release
+mv *.so build/lib.linux-x86_64-3.6/
+pip3 install -e . --user
+</pre>
 
 ### For Windows:
 * install git bash https://gitforwindows.org/
@@ -18,14 +23,13 @@ Build scripts are for spesific OS/Python versions - but they are only three line
 * Open x64 Native Tools Command Prompt for VS 2019
 * run msvc_build at Gempyre-Python folder
 
-For example Linux looks something like this
-<pre>
-cmake --build . --config Release
-mv *.so build/lib.linux-x86_64-3.6/
-pip3 install -e . --user
-</pre>
+### Run
 
-Then run some of the python scripts in test folder to if UI opens. 
+After install you just run the script!
+
+<pre>
+$ python3 test/python_test_1.html
+</pre>
 
 ## API
 
@@ -34,7 +38,7 @@ The programming interface is very same as in Gempyre-framework (https://github.c
 
 Please look  [Gempyre]) (https://github.com/mmertama/Gempyre.git) for documentation.
 
-Note that Gempyre-Utils is not implemented in Python, it has C++ utilites and thus not applicable for Python programmers as everything and more is already there!
+Please note that Gempyre Core and Gempyre Graphics are part of Python API, but not Gempyre-Utils, it has C++ utilites and thus not applicable for Python programmers as everything and more is already there!
   
 
 
