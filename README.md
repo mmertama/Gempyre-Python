@@ -25,7 +25,7 @@ pip3 install -e . --user
 
 ### Run
 
-After install you just run the script!
+After install, you just run the script!
 
 <pre>
 $ python3 test/python_test_1.html
