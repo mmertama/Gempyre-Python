@@ -13,9 +13,17 @@ mv *.so build/lib.linux-x86_64-3.6/
 pip3 install -e . --user
 </pre>
 
+### For Linux
+* $ git clone https://github.com/mmertama/Gempyre-Python.git
+* $ ./build_linux.sh
+
+### For MacOS
+* $ git clone https://github.com/mmertama/Gempyre-Python.git
+* $ ./build_osx.sh
+
 ### For Windows:
 * install git bash https://gitforwindows.org/
-* $ git clone https://github.com/mmertama/Gempyre.git
+* $ git clone https://github.com/mmertama/Gempyre-Python.git
 * install cmake https://cmake.org/download/ (let it to be added in path)
 * install Visual Studio https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019
 		* pick Desktop development with C++
