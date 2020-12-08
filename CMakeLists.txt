@@ -34,7 +34,7 @@ FetchContent_Declare(
 
 option(HAS_TEST OFF)
 option(HAS_BLOG OFF)
-option(HAS_AFFILIATES OFF)
+option(HAS_AFFILIATES ON)
 option(HAS_MDMAKER OFF)
     
 FetchContent_GetProperties(gempyre_library)
