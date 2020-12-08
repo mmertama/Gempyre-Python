@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 #include <pybind11/chrono.h>
+
 #include <gempyre.h>
 #include <gempyre_graphics.h>
 #include <../src/json.h> //as pybind11 wont support std::any we convert them to string using this internal class, sorry
@@ -38,6 +39,17 @@ static  std::optional<std::string> GempyreExtension(Gempyre::Ui* ui, const std::
     }
     std::optional<std::any> ext =  ui->extension(callId, params);
     return ext ? Gempyre::toString(*ext) : std::nullopt;
+}
+
+
+static std::string findBrowser() {
+    const auto pyclient_browser = py::module::import("pyclient");
+    const auto browser_path = pyclient_browser.attr("__file__");
+    const auto browser = browser_path.cast<std::string>();
+    
+    const auto sys = py::module::import("sys");
+    const auto result = sys.attr("executable");
+    return result.cast<std::string>() + " " + browser;
 }
 
 
@@ -103,30 +115,30 @@ PYBIND11_MODULE(Gempyre, m) {
        // Should I comment these out as using them is confusing due browser security concerns
         .def(py::init<const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
              py::arg("indexHtml"),
-             py::arg("browser"),
+             py::arg("browser") = findBrowser(),
              py::arg("extraParams") = "",
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
              )
-        .def(py::init<const std::string&, unsigned short, const std::string& >(),
+        /*.def(py::init<const std::string&, unsigned short, const std::string& >(),
                  py::arg("indexHtml"),
                  py::arg("port") = Gempyre::Ui::UseDefaultPort,
                  py::arg("root") = Gempyre::Ui::UseDefaultRoot
-                 )
+                 ) */
         .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
              py::arg("filemap"),
              py::arg("indexHtml"),
-             py::arg("browser"),
+             py::arg("browser") = findBrowser(),
              py::arg("extraParams") = "",
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
              )
-        .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, unsigned short, const std::string& >(),
+        /*.def(py::init<const Gempyre::Ui::Filemap&, const std::string&, unsigned short, const std::string& >(),
              py::arg("filemap"),
              py::arg("indexHtml"),
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
-            )
+            )*/
         .def_readonly_static("UseDefaultPort", &Gempyre::Ui::UseDefaultPort)
         .def_readonly_static("UseDefaultRoot", &Gempyre::Ui::UseDefaultRoot)
         .def("run", &Gempyre::Ui::run, py::call_guard<py::gil_scoped_release>())

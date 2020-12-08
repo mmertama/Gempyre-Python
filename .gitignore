@@ -25,3 +25,4 @@ build
 _deps
 .idea
 *-win_amd64.pyd 
+py_client.egg-info

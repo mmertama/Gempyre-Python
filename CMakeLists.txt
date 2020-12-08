@@ -34,7 +34,7 @@ FetchContent_Declare(
 
 option(HAS_TEST OFF)
 option(HAS_BLOG OFF)
-option(HAS_AFFILIATES ON)
+option(HAS_AFFILIATES OFF)
 option(HAS_MDMAKER OFF)
     
 FetchContent_GetProperties(gempyre_library)
@@ -75,6 +75,20 @@ add_custom_command(
     POST_BUILD
     COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
     )
+
+add_custom_command(
+    TARGET Gempyre
+    POST_BUILD
+    COMMAND ${PYTHON3} -m pip install --user -q -r ${GEMPYRE_DIR}/affiliates/py_client/requirements.txt
+    )
+
+add_custom_command(
+    TARGET Gempyre
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${GEMPYRE_DIR}/affiliates/py_client/pyclient.py
+            ${Python_SITELIB}/pyclient.py)
+
 
 link_directories(${gempyre_library_BINARY_DIR})
 target_link_libraries(Gempyre PRIVATE gempyre)
