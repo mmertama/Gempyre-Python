@@ -1,5 +1,7 @@
 # Gempyre-Python 
 
+The easy and productive UI library for Python. 
+
 ## Build
 
 Clone Gempyre-Python (https://github.com/mmertama/Gempyre-Python.git)
@@ -40,6 +42,8 @@ $ python3 test/python_test_1.html
 </pre>
 
 ## API
+
+See examples how to use: [telex_test](https://github.com/mmertama/Gempyre-Python/blob/master/test/telex_test.py)
 
 The programming interface is very same as in [Gempyre](https://github.com/mmertama/Gempyre.git)
 - except I changed function and method name naming from CamelCase to more pythonic snake_case (Im not sure if that was a right choice).
