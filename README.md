@@ -52,5 +52,14 @@ Please look  [Gempyre](https://github.com/mmertama/Gempyre.git) for documentatio
 
 Please note that Gempyre Core and Gempyre Graphics are part of Python API, but not Gempyre-Utils, it has C++ utilites and thus not applicable for Python programmers as everything and more is already there!
   
+## Examples
 
+### Minimum application
+
+<pre>
+import Gempyre
+
+ui = Gempyre.Ui("example.html")
+ui.run()
+</pre>
 
