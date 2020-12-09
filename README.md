@@ -56,10 +56,40 @@ Please note that Gempyre Core and Gempyre Graphics are part of Python API, but n
 
 ### Minimum application
 
-<pre>
+```py
 import Gempyre
 
 ui = Gempyre.Ui("example.html")
 ui.run()
-</pre>
+```
+
+### Application with interaction
+#### Python
+```py
+import Gempyre
+
+def main():
+    ui = Gempyre.Ui("example2.html")
+    output = Gempyre.Element(ui, "output")
+    open_button = Gempyre.Element(ui, "open")
+    open_button.subscribe("click", lambda _: output.set_html("Hello"))
+    ui.run()
+
+if __name__ == "__main__":
+    main()
+```
+#### HTML
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>test</title>
+</head>
+<body>
+  <script src="/gempyre.js"></script>
+  <button id="open">Open</button>
+  <pre id="output"></pre>
+</body>
+</html>
 
