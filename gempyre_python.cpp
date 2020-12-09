@@ -5,6 +5,8 @@
 
 #include <gempyre.h>
 #include <gempyre_graphics.h>
+#include <gempyre_client.h>
+
 #include <../src/json.h> //as pybind11 wont support std::any we convert them to string using this internal class, sorry
 
 
@@ -284,4 +286,28 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def("draw_image_clip", [](Gempyre::FrameComposer* fc, const std::string& id, const RectF& c, const RectF& r){fc->drawImage(id, c, r);})
                 .def("composed", &Gempyre::FrameComposer::composed)
                 ;
+    
+        py::class_<GempyreClient::Dialog<Gempyre::Ui>>(m, "Dialog")
+            .def(py::init<Gempyre::Ui&>())
+            
+            .def("open_file_dialog", [](GempyreClient::Dialog<Gempyre::Ui>* dlg, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::string> {
+                py::gil_scoped_acquire acquire;
+                return dlg->openFileDialog(caption, root, filter);    
+            }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=GempyreClient::Dialog<Gempyre::Ui>::Filter())
+            
+            .def("open_files_dialog", [](GempyreClient::Dialog<Gempyre::Ui>* dlg, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::vector<std::string>> {
+                py::gil_scoped_acquire acquire;
+                return dlg->openFilesDialog(caption, root, filter);    
+            }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=GempyreClient::Dialog<Gempyre::Ui>::Filter())
+            
+            .def("open_dir_dialog", [](GempyreClient::Dialog<Gempyre::Ui>* dlg, const std::string& caption, const std::string& root)->std::optional<std::string> {
+                py::gil_scoped_acquire acquire;
+                return dlg->openDirDialog(caption, root);    
+            }, py::arg("caption")="", py::arg("root")="")
+            
+            .def("save_file_dialog", [](GempyreClient::Dialog<Gempyre::Ui>* dlg, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::string> {
+                py::gil_scoped_acquire acquire;
+                return dlg->saveFileDialog(caption, root, filter);    
+            }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=GempyreClient::Dialog<Gempyre::Ui>::Filter())
+            ;
 }

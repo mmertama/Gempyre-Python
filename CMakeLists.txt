@@ -46,6 +46,7 @@ set(GEMPYRE_DIR ${gempyre_library_SOURCE_DIR})
 
 include_directories(
     "${gempyre_library_SOURCE_DIR}/gempyrelib/include"
+    "${gempyre_library_SOURCE_DIR}/affiliates/include"
     include
 )
 
