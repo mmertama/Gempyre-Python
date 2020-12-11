@@ -12,7 +12,7 @@ name = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(sys.ar
 map, names = resource.from_file(name)
 print(names[name], name)
 
-ui = Gempyre.Ui(map, names[name])
+ui = Gempyre.Ui(map, names[name]) if sys.platform != 'win32' or sys.version_info < (3,8) else Gempyre.Ui(map, names[name], "")
 
 ver, major, minor = Gempyre.version()
 Gempyre.Element(ui, 'ver').set_html("Gempyre Version: " + str(ver) + '.' + str(major) + '.' + str(minor));

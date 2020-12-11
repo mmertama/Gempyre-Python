@@ -13,7 +13,6 @@ endif()
 
 project(gempyrepy  LANGUAGES CXX C)
 
-find_program(PYTHON "python3" REQUIRED)
 set(Python_ADDITIONAL_VERSIONS 3.8)
 find_package(Python COMPONENTS Interpreter Development)
 include_directories(${PYTHON_INCLUDE_PATH})

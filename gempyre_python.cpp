@@ -6,6 +6,7 @@
 #include <gempyre.h>
 #include <gempyre_graphics.h>
 #include <gempyre_client.h>
+#include <gempyre_utils.h>
 
 #include <../src/json.h> //as pybind11 wont support std::any we convert them to string using this internal class, sorry
 
@@ -67,6 +68,7 @@ PYBIND11_MODULE(Gempyre, m) {
     .value("Debug_Trace", Gempyre::DebugLevel::Debug_Trace);
     m.def("set_debug", &Gempyre::setDebug, py::arg("level") = Gempyre::DebugLevel::Debug, py::arg("useLog") = false);
     m.def("version", &Gempyre::version);
+	m.def("os_browser", &GempyreUtils::osBrowser); //is this the only function fom GempyreUtils? Therefore attached here
 
     py::class_<Gempyre::Event>(m, "Event")
             .def_readonly("element", &Gempyre::Event::element)
