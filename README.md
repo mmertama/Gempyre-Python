@@ -29,9 +29,14 @@ pip3 install -e . --user
 * install cmake https://cmake.org/download/ (let it to be added in path)
 * install Visual Studio https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019
 		* pick Desktop development with C++
-* install Python 3.8 (3.6 >= shall be ok) https://www.python.org/downloads/windows/
+* install Python 3.7 (3.6 >= shall be ok) https://www.python.org/downloads/windows/
 * Open x64 Native Tools Command Prompt for VS 2019
 * run msvc_build at Gempyre-Python folder
+
+If you have Python 3.8, the internally used [cefpython3](https://pypi.org/project/cefpython3/) does not support Python 3.8 (other OS alternatives can be used and thus this apply only on Windows). Hopefully the support will be soon available. But meanwhile:
+	<code>ui = Gempyre.Ui(map, names[name]) if sys.platform != 'win32' or sys.version_info < (3,8) else Gempyre.Ui(map, names[name], "")
+</code>
+	when creating a Gempyre, should be a quick workaround. That is use the system browser instead (if nothing else works, Chrome should). The "" parameter set system default, but you can set there any browser call, see [Gempyre Documentation](https://github.com/mmertama/Gempyre/blob/master/gempyre.md#explicit-uiconst-stdstring-indexhtml-const-stdstring-browser-const-stdstring-extraparams---unsigned-short-port--usedefaultport-const-stdstring-root--usedefaultroot).
 
 ### Run
 
