@@ -59,7 +59,7 @@ static std::string findBrowser() {
 
 PYBIND11_MODULE(Gempyre, m) {
     py::enum_<Gempyre::DebugLevel>(m, "DebugLevel")
-    .value("None", Gempyre::DebugLevel::None)
+    .value("NoDebug", Gempyre::DebugLevel::NoDebug)
     .value("Fatal", Gempyre::DebugLevel::Fatal)
     .value("Error", Gempyre::DebugLevel::Error)
     .value("Warning", Gempyre::DebugLevel::Warning)
