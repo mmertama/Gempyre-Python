@@ -59,14 +59,14 @@ static std::string findBrowser() {
 
 PYBIND11_MODULE(Gempyre, m) {
     py::enum_<Gempyre::DebugLevel>(m, "DebugLevel")
-    .value("NoDebug", Gempyre::DebugLevel::NoDebug)
+    .value("Quiet", Gempyre::DebugLevel::Quiet)
     .value("Fatal", Gempyre::DebugLevel::Fatal)
     .value("Error", Gempyre::DebugLevel::Error)
     .value("Warning", Gempyre::DebugLevel::Warning)
     .value("Info", Gempyre::DebugLevel::Info)
     .value("Debug", Gempyre::DebugLevel::Debug)
     .value("Debug_Trace", Gempyre::DebugLevel::Debug_Trace);
-    m.def("set_debug", &Gempyre::setDebug, py::arg("level") = Gempyre::DebugLevel::Debug, py::arg("useLog") = false);
+    m.def("set_debug", &Gempyre::setDebug, py::arg("level") = Gempyre::DebugLevel::Warning, py::arg("useLog") = false);
     m.def("version", &Gempyre::version);
 	m.def("os_browser", &GempyreUtils::osBrowser); //is this the only function fom GempyreUtils? Therefore attached here
 
