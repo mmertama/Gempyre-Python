@@ -201,6 +201,9 @@ PYBIND11_MODULE(Gempyre, m) {
         .def("add_file", &Gempyre::Ui::addFile)
         .def("begin_batch", &Gempyre::Ui::beginBatch)
         .def("end_batch", &Gempyre::Ui::endBatch)
+        .def("hold_timers", &Gempyre::Ui::holdTimers)
+        .def("is_hold", &Gempyre::Ui::isHold)
+        .def("device_pixel_ratio", &Gempyre::Ui::devicePixelRatio)
             ;
 
         py::class_<Gempyre::CanvasElement, Gempyre::Element>(m, "CanvasElement")
