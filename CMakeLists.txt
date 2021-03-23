@@ -11,7 +11,7 @@ else()
 	set (PYTHON3 python)
 endif() 
 
-project(gempyrepy  LANGUAGES CXX C)
+project(gempyrepy LANGUAGES CXX C)
 
 set(Python_ADDITIONAL_VERSIONS 3.8)
 find_package(Python COMPONENTS Interpreter Development)
@@ -26,22 +26,36 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-fPIC)
 
-FetchContent_Declare(
-    gempyre_library
-    GIT_REPOSITORY https://github.com/mmertama/Gempyre.git
-    )
+find_package(gempyre PATHS $ENV{gempyre_DIR})
 
-option(HAS_TEST OFF)
-option(HAS_BLOG OFF)
-option(HAS_AFFILIATES OFF)
-option(HAS_MDMAKER OFF)
+if(NOT gempyre_FOUND)
+    message("Gempyre not found in the system, retrieve from the repository")
+    FetchContent_Declare(
+        gempyre_library
+        GIT_REPOSITORY https://github.com/mmertama/Gempyre.git
+        )
+
+    option(HAS_TEST OFF)
+    option(HAS_BLOG OFF)
+    option(HAS_AFFILIATES OFF)
+    option(HAS_MDMAKER OFF)
     
-FetchContent_GetProperties(gempyre_library)
-if(NOT gempyre_library)
-  FetchContent_Populate(gempyre_library)
-  add_subdirectory(${gempyre_library_SOURCE_DIR} ${gempyre_library_BINARY_DIR})
+    FetchContent_GetProperties(gempyre_library)
+    if(NOT gempyre_library)
+        FetchContent_Populate(gempyre_library)
+        add_subdirectory(${gempyre_library_SOURCE_DIR} ${gempyre_library_BINARY_DIR})
+    endif()
+    set(GEMPYRE_DIR ${gempyre_library_SOURCE_DIR})
+
+    include_directories(
+        "${gempyre_library_SOURCE_DIR}/gempyrelib/include"
+        "${gempyre_library_SOURCE_DIR}/affiliates/include"
+        include
+    )
+else()
+    set(gempyre_library_SOURCE_DIR $ENV{gempyre_DIR}/..)
+    set(GEMPYRE_DIR $ENV{gempyre_DIR}/..)
 endif()
-set(GEMPYRE_DIR ${gempyre_library_SOURCE_DIR})
 
 include_directories(
     "${gempyre_library_SOURCE_DIR}/gempyrelib/include"
