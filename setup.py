@@ -48,7 +48,7 @@ class CMakeBuild(build_ext):
         
         
 setup (name = 'Gempyre',
-       version = '1.0.1',
+       version = '1.1.0',
        description = 'Gempyre Framework',
        author = 'Markus Mertama',
        author_email = 'foobar@foobar',

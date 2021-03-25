@@ -8,9 +8,6 @@
 #include <gempyre_client.h>
 #include <gempyre_utils.h>
 
-//#include <../src/json.h> //as pybind11 wont support std::any we convert them to string using this internal class, sorry
-
-
 namespace py = pybind11;
 
 
@@ -44,17 +41,18 @@ static  std::optional<std::string> GempyreExtension(Gempyre::Ui* ui, const std::
     return ext ? GempyreUtils::toJsonString(*ext) : std::nullopt;
 }
 
-
 static std::string findBrowser() {
     const auto pyclient_browser = py::module::import("pyclient");
     const auto browser_path = pyclient_browser.attr("__file__");
     const auto browser = browser_path.cast<std::string>();
+
+    if(!GempyreUtils::fileExists(browser))
+        return std::string();
     
     const auto sys = py::module::import("sys");
     const auto result = sys.attr("executable");
     return result.cast<std::string>() + " " + browser;
 }
-
 
 
 PYBIND11_MODULE(Gempyre, m) {
