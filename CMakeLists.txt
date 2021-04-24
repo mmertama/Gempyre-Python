@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.14)
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
 project(gempyrepy LANGUAGES CXX C)
@@ -28,58 +28,18 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-fPIC)
 
-
-if(DEFINED $ENV{gempyre_DIR})
-    find_package(gempyre PATHS $ENV{gempyre_DIR})
-else()
-     find_package(gempyre PATHS $ENV{gempyre_DIR})
-     if(NOT gempyre_FOUND)
-         message(WARNING "gempyre_DIR env not set")
-     endif()
-endif()
-
-if(NOT gempyre_FOUND)
-    message("Gempyre not found in the system, retrieve from the repository")
-    FetchContent_Declare(
-        gempyre_library
-        GIT_REPOSITORY https://github.com/mmertama/Gempyre.git
-        )
-
-    option(HAS_TEST OFF)
-    option(HAS_BLOG OFF)
-    option(HAS_AFFILIATES OFF)
-    option(HAS_MDMAKER OFF)
-
-    FetchContent_GetProperties(gempyre_library)
-    if(NOT gempyre_library)
-        FetchContent_Populate(gempyre_library)
-        add_subdirectory(${gempyre_library_SOURCE_DIR} ${gempyre_library_BINARY_DIR})
-    endif()
-#    set(GEMPYRE_DIR ${gempyre_library_SOURCE_DIR})
-
-    include_directories(
-       # "${gempyre_library_SOURCE_DIR}/gempyrelib/include"
-       # "${gempyre_library_SOURCE_DIR}/affiliates/include"
-        include
-    )
-else()
-#    message("Gempyre at ${gempyre_DIR} inc: ${gempyre_INCLUDE_DIR}")
-#    set(gempyre_library_SOURCE_DIR $ENV{gempyre_DIR}/..)
-#    set(GEMPYRE_DIR $ENV{gempyre_DIR}/..)
-endif()
-
+# gempyre has to be installed
+find_package(gempyre REQUIRED)
 
 include_directories(
     /usr/local/include
-#    "${gempyre_library_SOURCE_DIR}/gempyrelib/include"
-#    "${gempyre_library_SOURCE_DIR}/affiliates/include"
     include
 )
 
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG        v2.5.0
+    GIT_TAG        v2.6.2
 )
 
 FetchContent_GetProperties(pybind11)
@@ -95,13 +55,15 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/README.md
 
 set(PYBIND11_PYTHON_VERSION 3.8)
 pybind11_add_module(Gempyre
-    src/gempyre_python.cpp)
+	src/gempyre_python.cpp)
 
 add_custom_command(
     TARGET Gempyre
     POST_BUILD
     COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
     )
+    
+target_link_libraries (Gempyre PRIVATE gempyre::gempyre)			
 
 #add_custom_command(
 #    TARGET Gempyre
@@ -117,5 +79,4 @@ add_custom_command(
 #            ${Python_SITELIB}/pyclient.py)
 
 
-link_directories(${gempyre_library_BINARY_DIR})
-target_link_libraries(Gempyre PRIVATE gempyre)
+
