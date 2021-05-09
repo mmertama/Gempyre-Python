@@ -13,7 +13,7 @@ fi
 mkdir -p build
 pushd build
 
-if [[ ! $(find /usr -name "gempyreConfig.cmake") ]]; then
+if [[ ! $(find /usr -name "gempyreConfig.cmake" 2>/dev/null) ]]; then
   git clone https://github.com/mmertama/Gempyre.git
   pushd Gempyre
   ./linux_install.sh
@@ -33,4 +33,3 @@ cp ./Gempyre.cpython-*.so lib.linux-x86_64-${PY_VER}/
 pip3 install -e .. --user
 
 popd
-

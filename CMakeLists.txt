@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
+
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
 project(gempyrepy LANGUAGES CXX C)
@@ -23,15 +24,21 @@ include(GNUInstallDirs)
 include(ExternalProject)
 include(FetchContent)
 
+find_path(PYTHON_HEADER_PATH "Python.h" HINTS ${Python_INCLUDE_DIRS} REQUIRED )
+
+if(NOT PYTHON_HEADER_PATH)
+    message(FATAL_ERROR "I assume you need '$sudo apt-get install python3-dev'")
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-fPIC)
 
+
 # gempyre has to be installed
 find_package(gempyre REQUIRED)
 
-include_directories(
+include_directories (
     /usr/local/include
     include
 )
@@ -77,6 +84,4 @@ target_link_libraries (Gempyre PRIVATE gempyre::gempyre)
 #    COMMAND ${CMAKE_COMMAND} -E copy
 #            ${GEMPYRE_DIR}/affiliates/py_client/pyclient.py
 #            ${Python_SITELIB}/pyclient.py)
-
-
 

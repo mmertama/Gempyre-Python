@@ -12,15 +12,18 @@ pushd build
 if [[ ! $(find /usr -name "gempyreConfig.cmake") ]]; then
   git clone https://github.com/mmertama/Gempyre.git
   pushd Gempyre
-  ./linux_install.sh
+  ./osx_install.sh
   popd
 fi
 
-cmake CMakeLists.txt
+cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
 OS_VER_LONG=$(defaults read loginwindow SystemVersionStampAsString)
 OS_VER=$(echo "${OS_VER_LONG}" | grep -o '[0-9]\+.[0-9]\+')
 PY_VER_LONG=$(python3 --version)
 PY_VER=$(echo "${PY_VER_LONG}" | grep -o '[0-9]\+.[0-9]\+')
-cp *.so build/lib.macosx-${OS_VER}-x86_64-${PY_VER}
-pip3 install -e . --user
+cp *.so lib.macosx-${OS_VER}-x86_64-${PY_VER}
+
+pip3 install -e .. --user
+
+popd

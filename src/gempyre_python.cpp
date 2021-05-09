@@ -42,16 +42,19 @@ static  std::optional<std::string> GempyreExtension(Gempyre::Ui* ui, const std::
 }
 
 static std::string findBrowser() {
-    const auto pyclient_browser = py::module::import("pyclient");
-    const auto browser_path = pyclient_browser.attr("__file__");
-    const auto browser = browser_path.cast<std::string>();
+    try {
+        const auto pyclient_browser = py::module::import("pyclient");
+        const auto browser_path = pyclient_browser.attr("__file__");
+        const auto browser = browser_path.cast<std::string>();
 
-    if(!GempyreUtils::fileExists(browser))
-        return std::string();
+        if(!GempyreUtils::fileExists(browser))
+            return std::string();
     
-    const auto sys = py::module::import("sys");
-    const auto result = sys.attr("executable");
-    return result.cast<std::string>() + " " + browser;
+        const auto sys = py::module::import("sys");
+        const auto result = sys.attr("executable");
+        return result.cast<std::string>() + " " + browser;
+        } catch(...) {}
+        return std::string();
 }
 
 
@@ -218,8 +221,8 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def("paint_image_rect", [](Gempyre::CanvasElement* el, const std::string& imageId, const RectF& targetRect, const RectF& clippingRect) {
                     el->paintImage(imageId, targetRect, clippingRect);
                     }, py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
-                .def("draw_commands", py::overload_cast<const Gempyre::CanvasElement::CommandList&>(&Gempyre::CanvasElement::draw))
-                .def("draw_frame", py::overload_cast<const Gempyre::FrameComposer&>(&Gempyre::CanvasElement::draw))
+                .def("draw_commands", py::overload_cast<const Gempyre::CanvasElement::CommandList&>(&Gempyre::CanvasElement::draw, py::const_))
+                .def("draw_frame", py::overload_cast<const Gempyre::FrameComposer&>(&Gempyre::CanvasElement::draw, py::const_))
                 .def("erase", &Gempyre::CanvasElement::erase, py::arg("resized") = false)
                 ;
         m.def("color_rgba_clamped", &Gempyre::Color::rgbaClamped);
