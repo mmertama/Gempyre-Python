@@ -46,9 +46,8 @@ if(NOT gempyre_FOUND)
         )
 
     option(HAS_TEST OFF)
-    option(HAS_BLOG OFF)
+    option(HAS_EXAMPLES OFF)
     option(HAS_AFFILIATES OFF)
-    option(HAS_MDMAKER OFF)
 
     FetchContent_GetProperties(gempyre_library)
     if(NOT gempyre_library)
