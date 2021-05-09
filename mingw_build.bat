@@ -7,21 +7,23 @@ goto exit
 
 if not exist "mingw_build" mkdir mingw_build
 
-pushd msvc_build
+pushd mingw_build
 
-if exist "C:\Program Files(86)\gempyre" goto found
+if exist "C:\Program Files (x86)\gempyre" goto found
 if exist "C:\Program Files\gempyre" goto found
 
 git clone https://github.com/mmertama/Gempyre.git
 pushd Gempyre
-mingw_install.sh
+call mingw_install.bat
 popd
 
 :found
 
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
-move /Y Release\*.pyd build\lib.win-amd64-3.8\ 
+
+if not exist "..\build\lib.win-amd64-3.8" mkdir ..\build\lib.win-amd64-3.8
+move /Y Release\*.pyd ..\build\lib.win-amd64-3.8\ 
 pip3 install -e .. --user
 
 popd
