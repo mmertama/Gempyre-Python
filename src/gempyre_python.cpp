@@ -224,9 +224,17 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def("draw_commands", py::overload_cast<const Gempyre::CanvasElement::CommandList&>(&Gempyre::CanvasElement::draw, py::const_))
                 .def("draw_frame", py::overload_cast<const Gempyre::FrameComposer&>(&Gempyre::CanvasElement::draw, py::const_))
                 .def("erase", &Gempyre::CanvasElement::erase, py::arg("resized") = false)
+                .def("draw_completed", [](Gempyre::CanvasElement* el, std::function<void ()> drawCallback = nullptr) {
+                    el->drawCompleted(drawCallback ? [&drawCallback]() {
+                        py::gil_scoped_acquire acquire;
+                        drawCallback();
+                    } : drawCallback);
+                })
                 ;
-        m.def("color_rgba_clamped", &Gempyre::Color::rgbaClamped);
-        m.def("color_rgba", &Gempyre::Color::rgba);
+        m.def("color_rgba_clamped", &Gempyre::Color::rgbaClamped, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF);
+        m.def("color_rgba", py::overload_cast<uint32_t, uint32_t, uint32_t, uint32_t>(&Gempyre::Color::rgba), py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF);
+        m.def("color_rgba_string", py::overload_cast<uint32_t>(&Gempyre::Color::rgba));
+        m.def("color_rgb_string", py::overload_cast<uint32_t>(&Gempyre::Color::rgb));
         m.def("color_r", &Gempyre::Color::r);
         m.def("color_g", &Gempyre::Color::g);
         m.def("color_b", &Gempyre::Color::b);

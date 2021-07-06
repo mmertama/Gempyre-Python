@@ -9,7 +9,7 @@
 mkdir -p build
 pushd build
 
-if [[ ! $(find /usr -name "gempyreConfig.cmake") ]]; then
+if [[ ! $(find /usr -name "gempyreConfig.cmake" 2> /dev/null) ]]; then
   git clone https://github.com/mmertama/Gempyre.git
   pushd Gempyre
   ./osx_install.sh
@@ -22,7 +22,9 @@ OS_VER_LONG=$(defaults read loginwindow SystemVersionStampAsString)
 OS_VER=$(echo "${OS_VER_LONG}" | grep -o '[0-9]\+.[0-9]\+')
 PY_VER_LONG=$(python3 --version)
 PY_VER=$(echo "${PY_VER_LONG}" | grep -o '[0-9]\+.[0-9]\+')
-cp *.so lib.macosx-${OS_VER}-x86_64-${PY_VER}
+mkdir -p lib.macosx-${OS_VER}-x86_64-${PY_VER}
+cp *.so lib.macosx-${OS_VER}-x86_64-${PY_VER}/
+# find . -name "lib.*" -exec cp *.so {}/ \;
 
 pip3 install -e .. --user
 
