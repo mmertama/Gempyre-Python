@@ -27,3 +27,4 @@ _deps
 *-win_amd64.pyd 
 py_client.egg-info
 builds
+*build

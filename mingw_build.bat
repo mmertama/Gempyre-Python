@@ -1,20 +1,20 @@
 rem @echo off
-if "%VSCMD_ARG_HOST_ARCH%"=="x64" goto pass_ver
-
-echo Execute in the x64 Native tools command prompt.
+for /f "delims=" %%F in ('where grep') do set var=%%F 
+if NOT %var%=="" goto pass_ver
+echo Msys shall be in path - C:\msys64\mingw64\bin;C:\msys64\usr\bin;
 goto exit
 :pass_ver
 
-if not exist "msvc_build" mkdir msvc_build
+if not exist "mingw_build" mkdir mingw_build
 
-pushd msvc_build
+pushd mingw_build
 
 if exist "C:\Program Files (x86)\gempyre" goto found
 if exist "C:\Program Files\gempyre" goto found
 
 git clone https://github.com/mmertama/Gempyre.git
 pushd Gempyre
-call msvc_install.bat
+call mingw_install.bat
 popd
 
 :found
