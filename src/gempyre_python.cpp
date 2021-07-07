@@ -178,20 +178,33 @@ PYBIND11_MODULE(Gempyre, m) {
         .def("debug", &Gempyre::Ui::debug)
         .def("alert", &Gempyre::Ui::alert)
         .def("open", &Gempyre::Ui::open, py::arg("url"), py::arg("name") = "")
-        .def("start_timer", [](Gempyre::Ui* ui, const std::chrono::milliseconds& ms, bool b, const std::function<void ()>& f) {
-            return ui->startTimer(ms, b, [f]() {
+        .def("start_periodic", [](Gempyre::Ui* ui, const std::chrono::milliseconds& ms, const std::function<void ()>& f) {
+            return ui->startPeriodic(ms, [f]() {
                 py::gil_scoped_acquire acquire;
                 f();
             });
         })
         // When wrapping in fp (to enable GIL), there is no need: py::overload_cast<const std::chrono::milliseconds&, bool, const std::function<void (Gempyre::Ui::TimerId)>&>(&Gempyre::Ui::startTimer)
-        .def("start_timer_id", [](Gempyre::Ui* ui, const std::chrono::milliseconds& ms, bool b, const std::function<void (Gempyre::Ui::TimerId)>& f) {
-            return ui->startTimer(ms, b, [f](Gempyre::Ui::TimerId tid) {
+        .def("start_periodic_id", [](Gempyre::Ui* ui, const std::chrono::milliseconds& ms, const std::function<void (Gempyre::Ui::TimerId)>& f) {
+            return ui->startPeriodic(ms, [f](Gempyre::Ui::TimerId tid) {
                 py::gil_scoped_acquire acquire;
                 f(tid);
             });
         })
-        .def("stop_timer", &Gempyre::Ui::stopTimer)
+        .def("after", [](Gempyre::Ui* ui, const std::chrono::milliseconds& ms, const std::function<void ()>& f) {
+        return ui->after(ms, [f]() {
+            py::gil_scoped_acquire acquire;
+            f();
+            });
+        })
+        // When wrapping in fp (to enable GIL), there is no need: py::overload_cast<const std::chrono::milliseconds&, bool, const std::function<void (Gempyre::Ui::TimerId)>&>(&Gempyre::Ui::startTimer)
+        .def("after_id", [](Gempyre::Ui* ui, const std::chrono::milliseconds& ms, const std::function<void (Gempyre::Ui::TimerId)>& f) {
+        return ui->after(ms, [f](Gempyre::Ui::TimerId tid) {
+            py::gil_scoped_acquire acquire;
+            f(tid);
+            });
+        })
+        .def("cancel", &Gempyre::Ui::cancel)
         .def("root", &Gempyre::Ui::root)
         .def("address_of", &Gempyre::Ui::addressOf)
         .def("by_class", &Gempyre::Ui::byClass)
