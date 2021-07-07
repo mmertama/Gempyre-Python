@@ -35,6 +35,7 @@ output = Gempyre.Element(ui, "output")
 
 decoding = 'CP850' if psutil.Process(os.getpid()).parent().name() == 'cmd.exe' else 'utf-8'
 
+
 def do_run(ev):
     global input
     global output

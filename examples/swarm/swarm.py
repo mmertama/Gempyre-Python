@@ -3,9 +3,6 @@ from Gempyre_utils import resource
 import random
 import math
 from datetime import timedelta  # for time periods
-import itertools
-
-import sys
 
 
 def normalize(r):
@@ -39,75 +36,50 @@ def towards(r0, r, step):
 
 
 class Bee:
+    width = 10
+    height = 10
+    min_distance = 300
+    sight_len = 5
+
     def __init__(self, swarm):
         self.x = 0
         self.y = 0
-        self.width = 10
-        self.height = 10
         self.direction = random.random() * math.pi * 2
         self.heading = self.direction
         self.swarm = swarm
         self.speed = 1
-        self.min_distance = self.width * self.height
-
-    #def is_in(self, x, y):
-    #    return self.x < x < self.x + self.width and self.y < y < self.y + self.height
-
-    @staticmethod
-    def average(closests):
-        x = 0
-        y = 0
-        #dx = 0
-        #dy = 0
-        c_l = len(closests)
-        c = 1 / c_l
-        for b in closests:
-            bee = b[0]
-            x += bee.x * c
-            y += bee.y * c
-            #dx += math.sin(bee.direction)
-            #dy += math.cos(bee.direction)
-
-        #x /= c_l
-        #y /= c_l
-        #dx /= c_l
-        #dy /= c_l
-        #d = math.atan2(dx, dy)
-        return x, y #, d
+        self.chasing = False
+        self.see_x = 0
+        self.see_y = 0
 
     def move(self):
-        nearests = self.swarm.sample(self)
-        #if not self.swarm.is_in(self.x, self.y, self.width):
-        #    m_x, m_y = self.swarm.mid_point()
-        #    xx = self.x - m_x
-        #    yy = self.y - m_y
-        #    self.direction = math.atan2(yy, xx) + math.pi
-        #el
-        #if nearests[0][1] <= self.min_distance:
-        #    bee = nearests[0][0]
-        #    xx = self.x - bee.x
-        #    yy = self.y - bee.y
-        #    self.direction = math.atan2(yy, xx)
-        #else:
-        x, y = self.average(nearests)
-        xx = self.x - x
-        yy = self.y - y
-        self.direction = math.atan2(yy, xx) + math.pi
-            #self.direction = d
-        #self.heading = self.direction
-        #self.direction = normalize(self.direction)
-
+        bee, dist = self.swarm.closest(self)
+        if dist < self.min_distance:
+            xx = self.x - bee.x
+            yy = self.y - bee.y
+            self.direction = math.atan2(yy, xx)
+            self.chasing = False
+        else:
+            xx = self.x - self.swarm.fake_bee.x
+            yy = self.y - self.swarm.fake_bee.y
+            self.direction = math.atan2(yy, xx) + math.pi
+            self.chasing = True
         self.heading = towards(self.heading, self.direction, 0.03)
-
-        #self.heading = normalize(self.heading - delta / 10)
         next_x = math.cos(self.heading) * self.speed
         next_y = math.sin(self.heading) * self.speed
         self.x += next_x
         self.y += next_y
 
+        self.see_x = self.x + next_x * self.sight_len
+        self.see_y = self.y + next_y * self.sight_len
+
     def draw(self, drawer):
         d = self.heading
         drawer.save()
+        if self.chasing:
+            drawer.fill_style('black')
+        else:
+            drawer.fill_style('blue')
         drawer.translate(self.x, self.y)
         drawer.rotate(d)
         drawer.translate(-self.x, -self.y)
@@ -118,7 +90,6 @@ class Bee:
         drawer.line_to(self.x - self.width / 4, self.y)
         drawer.fill()
         drawer.restore()
-        #drawer.fill_text(str(int(d * 180 / math.pi)), self.x, self.y)
 
 
 class Swarm:
@@ -132,43 +103,18 @@ class Swarm:
         for i in range(0, bee_count):
             self.bees.append(Bee(self))
 
-    #def is_in(self, x, y, rad):
-    #    return self.x - rad < x < self.x + self.width + rad and self.y + rad < y < self.y + self.height + rad
-
-    def sample(self, bee):
-        set_of = []
-        sample = random.sample(self.bees, 5)
-        for b in sample:
-            if b != bee:
-                dx = bee.x - b.x
-                dy = bee.y - b.y
-                dist = dx * dx + dy * dy
-                set_of.append((b, dist))
-
-        dx = bee.x - self.fake_bee.x
-        dy = bee.y - self.fake_bee.y
-        dist = dx * dx + dy * dy
-        set_of.append((self.fake_bee, dist))
-
-        set_of.sort(key=lambda r: r[1])
-        return set_of
-
     def closest(self, bee):
-        close_set = []
+        closest_one = None
+        closest_one_dist = self.width * self.height
         for b in self.bees:
             if b != bee:
-                dx = bee.x - b.x
-                dy = bee.y - b.y
+                dx = bee.see_x - b.see_x
+                dy = bee.see_y - b.see_y
                 dist = dx * dx + dy * dy
-                if len(close_set) < 5:
-                    close_set.append((b, dist))
-                else:
-                    for i, c in enumerate(close_set):
-                        if c[1] < dist:
-                            close_set[i] = (b, dist)
-                            break
-        close_set.sort(key=lambda r: r[1])
-        return close_set
+                if dist < closest_one_dist:
+                    closest_one_dist = dist
+                    closest_one = b
+        return closest_one, closest_one_dist
 
     def mid_point(self):
         return (self.x + self.width / 2,
@@ -196,17 +142,14 @@ def main():
     canvas = Gempyre.CanvasElement(ui, "canvas")
     swarm = Swarm(200)
     canvas_rect = Gempyre.Rect()
-    dev_ratio = 1
 
     def resize_handler(_):
         nonlocal canvas_rect
-        nonlocal dev_ratio
         canvas_rect = canvas.rect()
-        dev_ratio = ui.device_pixel_ratio()
-        swarm.x = 0#canvas_rect.x #* dev_ratio
-        swarm.y = 0#canvas_rect.y #* dev_ratio
-        swarm.width = canvas_rect.width #* dev_ratio
-        swarm.height = canvas_rect.height #* dev_ratio
+        swarm.x = 0
+        swarm.y = 0
+        swarm.width = canvas_rect.width
+        swarm.height = canvas_rect.height
 
     ui.root().subscribe("resize", resize_handler)
 
@@ -226,8 +169,9 @@ def main():
 
     ui.on_open(on_start)
 
-    ui.start_timer(timedelta(milliseconds=80), False, lambda: swarm.move())
-    ui.start_timer(timedelta(milliseconds=100), False, lambda: draw())
+    ui.start_periodic(timedelta(milliseconds=40), lambda: swarm.move())
+
+    canvas.draw_completed(draw)
 
     def make_move(event):
         mouse_x = float(event.properties['clientX']) - canvas_rect.x
@@ -242,8 +186,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    #d = 0
-    #n = 2
-    #for i in range(0, 1000):
-    #    print(d, n)
-    #    n = towards(n, d, 0.01)

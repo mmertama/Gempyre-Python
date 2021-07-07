@@ -257,27 +257,39 @@ class Game:
         Gempyre.Element(self.ui, "waves").set_html(str(self.wave + 1))
         Gempyre.Element(self.ui, "monsters").set_html(str(int(self.wave_count + 0.5)))
         Gempyre.Element(self.ui, "instructions").set_attribute("style", "visibility:hidden")
-        self.tick = self.ui.start_timer(timedelta(milliseconds=TICK_SPEED), False, self.game_loop)
+        self.tick = self.ui.start_periodic(timedelta(milliseconds=TICK_SPEED), self.game_loop)
         if self.game_speed > GAME_SPEED / 10:
             self.game_speed -= 1
+        self.canvas.draw_completed(lambda: self.draw_loop())
+        self.draw_loop()
 
     def game_over(self):
-        self.ui.stop_timer(self.tick);
+        self.ui.cancel(self.tick);
+        self.canvas.draw_completed(None)
         self.tick = None
         Gempyre.Element(self.ui, "game_over").set_attribute("style", "visibility:visible")
         Gempyre.Element(self.ui, "instructions").set_attribute("style", "visibility:visible")
         self.restart = True
 
     def wave_end(self):
-        self.ui.stop_timer(self.tick);
+        self.ui.cancel(self.tick)
+        self.canvas.draw_completed(None)
         self.tick = None
         Gempyre.Element(self.ui, "wave_end").set_attribute("style", "visibility:visible")
         self.wave += 1
 
-    def game_loop(self):
+    def draw_loop(self):
         fc = Gempyre.FrameComposer()
         fc.clear_rect(Gempyre.Rect(0, 0, self.width, self.height))
+        for bullet in self.bullets:
+            bullet.draw(fc, self.bullet)
+        for monster in self.monsters:
+            monster.draw(fc, self.skull)
+        self.gun.draw(fc, self.dome, self.barrel)
+        self.ammo.draw(fc, self.bullet)
+        self.canvas.draw_frame(fc)
 
+    def game_loop(self):
         for bullet in self.bullets:
             bullet.step()
             to_delete = bullet.test_inside(0, 0, self.width, self.height)
@@ -285,9 +297,7 @@ class Game:
                 self.bullets.remove(bullet)
             else:
                 bullet.step()
-
                 bullet.test_hit(self.gun)
-
                 for monster in self.monsters:
                     if bullet.test_hit(monster):
                         monster.endurance -= 1
@@ -303,14 +313,11 @@ class Game:
                                 self.ammo.count += 1
 
                     bullet.step()
-                bullet.draw(fc, self.bullet)
-
         gaps = []
         for monster in self.monsters:
             monster.step()
             if monster.y < 0:
                 gaps.append(monster.x)
-            monster.draw(fc, self.skull)
             to_delete = monster.test_inside(0, 0, self.width, self.height)
             if to_delete:
                 self.monsters.remove(monster)
@@ -329,10 +336,6 @@ class Game:
                 if is_ok:
                     self.create_monster(x_pos)
                     self.wave_count -= 1
-
-        self.gun.draw(fc, self.dome, self.barrel)
-        self.ammo.draw(fc, self.bullet)
-        self.canvas.draw_frame(fc)
 
     def shoot(self):
         if not self.tick:
