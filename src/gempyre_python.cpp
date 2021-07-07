@@ -224,11 +224,11 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def("draw_commands", py::overload_cast<const Gempyre::CanvasElement::CommandList&>(&Gempyre::CanvasElement::draw, py::const_))
                 .def("draw_frame", py::overload_cast<const Gempyre::FrameComposer&>(&Gempyre::CanvasElement::draw, py::const_))
                 .def("erase", &Gempyre::CanvasElement::erase, py::arg("resized") = false)
-                .def("draw_completed", [](Gempyre::CanvasElement* el, std::function<void ()> drawCallback = nullptr) {
-                    el->drawCompleted(drawCallback ? [&drawCallback]() {
+                .def("draw_completed", [](Gempyre::CanvasElement* canvas, const std::function<void ()>& drawCallback)->void {
+                    canvas->drawCompleted(drawCallback ? [drawCallback]() {
                         py::gil_scoped_acquire acquire;
                         drawCallback();
-                    } : drawCallback);
+                    } : static_cast<decltype(drawCallback)>(nullptr));
                 })
                 ;
         m.def("color_rgba_clamped", &Gempyre::Color::rgbaClamped, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF);
