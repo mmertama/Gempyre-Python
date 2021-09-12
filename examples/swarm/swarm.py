@@ -3,7 +3,8 @@ from Gempyre_utils import resource
 import random
 import math
 from datetime import timedelta  # for time periods
-
+import os
+import sys
 
 def normalize(r):
     while r < 0:
@@ -137,8 +138,9 @@ class Swarm:
 def main():
     print(Gempyre.version())
     Gempyre.set_debug(Gempyre.DebugLevel.Warning)
-    file_map, names = resource.from_file("swarm.html")
-    ui = Gempyre.Ui(file_map, '/swarm.html', Gempyre.os_browser())
+    current_dir = os.path.dirname(sys.argv[0])
+    file_map, names = resource.from_file(current_dir + "/swarm.html")
+    ui = Gempyre.Ui(file_map, '/swarm.html')
     canvas = Gempyre.CanvasElement(ui, "canvas")
     swarm = Swarm(200)
     canvas_rect = Gempyre.Rect()

@@ -218,6 +218,7 @@ class Game:
         self.wave = 0
         self.wave_count = 0
         self.restart = True
+        self.on_draw = 0
 
     @staticmethod
     def _get(name, images):
@@ -257,11 +258,22 @@ class Game:
         Gempyre.Element(self.ui, "waves").set_html(str(self.wave + 1))
         Gempyre.Element(self.ui, "monsters").set_html(str(int(self.wave_count + 0.5)))
         Gempyre.Element(self.ui, "instructions").set_attribute("style", "visibility:hidden")
-        self.tick = self.ui.start_periodic(timedelta(milliseconds=TICK_SPEED), self.game_loop)
+        self.tick = self.ui.start_periodic(timedelta(milliseconds=TICK_SPEED), self.do_tick)
         if self.game_speed > GAME_SPEED / 10:
             self.game_speed -= 1
-        self.canvas.draw_completed(lambda: self.draw_loop())
+        self.canvas.draw_completed(lambda: self.draw_completed())
         self.draw_loop()
+
+    def do_tick(self):
+        self.game_loop()
+        self.on_draw -= 1;
+        if self.on_draw > 0:
+            return;
+        self.on_draw = 10
+        self.draw_loop()
+
+    def draw_completed(self):
+        self.on_draw = 0
 
     def game_over(self):
         self.ui.cancel(self.tick);
@@ -270,6 +282,7 @@ class Game:
         Gempyre.Element(self.ui, "game_over").set_attribute("style", "visibility:visible")
         Gempyre.Element(self.ui, "instructions").set_attribute("style", "visibility:visible")
         self.restart = True
+        self.draw_loop()
 
     def wave_end(self):
         self.ui.cancel(self.tick)
@@ -277,6 +290,7 @@ class Game:
         self.tick = None
         Gempyre.Element(self.ui, "wave_end").set_attribute("style", "visibility:visible")
         self.wave += 1
+        self.draw_loop()
 
     def draw_loop(self):
         fc = Gempyre.FrameComposer()
@@ -350,13 +364,13 @@ class Game:
     def turret(self, angle):
         if angle > -math.pi and angle - math.pi:
             self.gun.angle = angle
+        self.draw_loop()
 
     def turret_turn(self, angle):
         self.turret(self.gun.angle + angle)
 
     def gun_move(self, x):
         self.gun.move(x, 0, self.width)
-
 
 def main():
     root = os.path.dirname(sys.argv[0]) + '/assets/'
@@ -414,7 +428,6 @@ def main():
     ui.root().subscribe('keydown', key_listen, ['keyCode'])
     ui.run()
 
-
 if __name__ == "__main__":
-    # Gempyre.set_debug()
+    #Gempyre.set_debug()
     main()
