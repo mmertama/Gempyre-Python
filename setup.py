@@ -5,6 +5,7 @@ import sys
 import platform
 import subprocess
 
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir = ''):
         Extension.__init__(self, name, sources = [])
@@ -33,7 +34,6 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             build_args += ['--', '-j2']
 
-       
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         print("Using temp:", self.build_temp)
@@ -45,21 +45,26 @@ class CMakeBuild(build_ext):
         #subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
         #subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd = self.build_temp)
 
-        
-        
-setup (name = 'Gempyre',
-       version = '0.6.0',
-       description = 'Gempyre Framework',
-       author = 'Markus Mertama',
-       author_email = 'foobar@foobar',
-       url = 'https://github.com/mmertama',
-       long_description = '''
+
+setup (name='Gempyre',
+       version='0.6.0',
+       license='MIT',
+       description='Gempyre Framework',
+       author='Markus Mertama',
+       author_email='foobar@foobar',
+       url='https://github.com/mmertama',
+       long_description='''
 Gempyre is C++ Framework for quick and simple UI development and Gempyre-Python apply that breeze to Python development.
 ''',
-      packages = find_packages(),
-      ext_modules = [CMakeExtension('Gempyre')],
-      cmdclass = {'build_ext': CMakeBuild},
-      setup_requires = ['wheel']
+       packages=find_packages(),
+       ext_modules=[CMakeExtension('Gempyre')],
+       cmdclass={'build_ext': CMakeBuild},
+       setup_requires=['wheel'],
+       install_requires=['pywebview', 'websockets'],
+       scripts=['pyclient.py']
+       #entry_points={
+       #    'console_scripts': ['pyclient=client.pyclient:main']}
+
   #    setup_requires=['wheel', 'sdist']
       )
        
