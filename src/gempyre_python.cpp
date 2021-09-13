@@ -56,19 +56,25 @@ static void GempyreExtensionCall(Gempyre::Ui* ui, const std::string& callId, con
 }
 
 static std::string findBrowser() {
-    try {
-        const auto pyclient_browser = py::module::import("pyclient");
-        const auto browser_path = pyclient_browser.attr("__file__");
-        const auto browser = browser_path.cast<std::string>();
+    const auto pyclient = GempyreUtils::which("pyclient");
+    if(!pyclient.empty()) {
+        return pyclient;
+    } else {
+        try {
+                const auto pyclient_browser = py::module::import("pyclient");
+                const auto browser_path = pyclient_browser.attr("__file__");
+                const auto browser = browser_path.cast<std::string>();
 
-        if(!GempyreUtils::fileExists(browser))
-            return std::string();
-    
-        const auto sys = py::module::import("sys");
-        const auto result = sys.attr("executable");
-        return result.cast<std::string>() + " " + browser;
-        } catch(...) {}
-        return std::string();
+                if(!GempyreUtils::fileExists(browser))
+                    return std::string();
+
+                const auto sys = py::module::import("sys");
+                const auto result = sys.attr("executable");
+                return result.cast<std::string>() + " " + browser;
+
+            } catch(...) {}
+        }
+    return std::string();
 }
 
 
@@ -139,12 +145,34 @@ PYBIND11_MODULE(Gempyre, m) {
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
              )
+         .def(py::init<const std::string&, const std::string&, int, int, const std::string&, const std::string&, unsigned short, const std::string& >(),
+             py::arg("indexHtml"),
+             py::arg("width"),
+             py::arg("height"),
+             py::arg("title"),
+             py::arg("browser") = findBrowser(),
+             py::arg("extraParams") = "",
+             py::arg("port") = Gempyre::Ui::UseDefaultPort,
+             py::arg("root") = Gempyre::Ui::UseDefaultRoot
+             )
         /*.def(py::init<const std::string&, unsigned short, const std::string& >(),
                  py::arg("indexHtml"),
                  py::arg("port") = Gempyre::Ui::UseDefaultPort,
                  py::arg("root") = Gempyre::Ui::UseDefaultRoot
                  ) */
-        .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
+        .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, int, int, const std::string&,
+         const std::string&, const std::string&, unsigned short, const std::string& >(),
+             py::arg("filemap"),
+             py::arg("indexHtml"),
+             py::arg("width"),
+             py::arg("height"),
+             py::arg("title"),
+             py::arg("browser") = findBrowser(),
+             py::arg("extraParams") = "",
+             py::arg("port") = Gempyre::Ui::UseDefaultPort,
+             py::arg("root") = Gempyre::Ui::UseDefaultRoot
+             )
+         .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
              py::arg("filemap"),
              py::arg("indexHtml"),
              py::arg("browser") = findBrowser(),

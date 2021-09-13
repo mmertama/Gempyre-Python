@@ -6,6 +6,7 @@ from datetime import timedelta  # for time periods
 import os
 import sys
 
+
 def normalize(r):
     while r < 0:
         r += 2 * math.pi
@@ -140,7 +141,7 @@ def main():
     Gempyre.set_debug(Gempyre.DebugLevel.Warning)
     current_dir = os.path.dirname(sys.argv[0])
     file_map, names = resource.from_file(current_dir + "/swarm.html")
-    ui = Gempyre.Ui(file_map, '/swarm.html')
+    ui = Gempyre.Ui(file_map, '/swarm.html', 800 + 15, 600 + 20, "Swarm")
     canvas = Gempyre.CanvasElement(ui, "canvas")
     swarm = Swarm(200)
     canvas_rect = Gempyre.Rect()

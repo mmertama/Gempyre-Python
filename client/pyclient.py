@@ -6,6 +6,7 @@ import sys
 import webview
 import websockets
 import re
+import argparse;
 
 do_exit = None
 
@@ -62,7 +63,7 @@ def on_show(window, host, port):
                 params = json.loads(obj['extension_parameters'])
                 ext_id = obj['extension_id']
 
-                if call_id == "openFile":
+                if call_id == 'openFile':
                     dir_name = params['dir']
                     filters = params["filter"]
 
@@ -75,7 +76,7 @@ def on_show(window, host, port):
                         'extension_call': "openFileResponse",
                         'extension_id': ext_id,
                         'openFileResponse': str(result[0]) if result else ""})
-                if call_id == "openFiles":
+                if call_id == 'openFiles':
                     dir_name = params['dir']
                     filters = params["filter"]
                     result = window.create_file_dialog(webview.OPEN_DIALOG,
@@ -87,7 +88,7 @@ def on_show(window, host, port):
                         'extension_call': "openFilesResponse",
                         'extension_id': ext_id,
                         'openFilesResponse': list(result) if result else []})
-                if call_id == "openDir":
+                if call_id == 'openDir':
                     dir_name = params['dir']
                     result = window.create_file_dialog(webview.FOLDER_DIALOG,
                                                        directory=dir_name,
@@ -97,7 +98,7 @@ def on_show(window, host, port):
                         'extension_call': "openDirResponse",
                         'extension_id': ext_id,
                         'openDirResponse': str(result[0]) if result else ""})
-                if call_id == "saveFile":
+                if call_id == 'saveFile':
                     dir_name = params['dir']
                     filters = params["filter"]
                     result = window.create_file_dialog(webview.SAVE_DIALOG,
@@ -110,6 +111,18 @@ def on_show(window, host, port):
                         'extension_id': ext_id,
                         'saveFileResponse': str(result) if result else ""})
 
+                if call_id == 'setAppIcon':
+                    pass
+                if call_id == 'resize':
+                    width = params['width']
+                    height = params['height']
+                    window.resize(width, height)
+                if call_id == 'setTitle':
+                    title = params['title']
+                    window.set_title(title)
+                if call_id == 'ui_info':
+                    pass
+
                 await ws.send(response)
 
     asyncio.run(extender())
@@ -118,7 +131,7 @@ def on_show(window, host, port):
 def main():
     width = 1024
     height = 768
-    title = "Gempyre Application"
+    title = ""
 
     if len(sys.argv) < 2:
         sys.exit("Usage: URL <width> <height> <title>")
@@ -127,11 +140,15 @@ def main():
     uri = None
 
     try:
-        if len(sys.argv) > 2:
+        if len(sys.argv) > 2 and sys.argv[2].isdigit():
             width = int(sys.argv[2])
+        else:
+            raise ValueError
 
-        if len(sys.argv) > 3:
+        if len(sys.argv) > 3 and sys.argv[3].isdigit():
             height = int(sys.argv[3])
+        else:
+            raise ValueError
 
         if len(sys.argv) > 4:
             title = sys.argv[4]
@@ -149,9 +166,46 @@ def main():
         uri = urlparse(uri_string)
 
     except ValueError as err:
-        print("Invalid parameters", err, sys.argv, file=sys.stderr)
-        sys.exit(-1)
+        pass
+    ##
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--gempyre-url", type=str)
+    parser.add_argument("--gempyre-width", type=int)
+    parser.add_argument("--gempyre-height", type=int)
+    parser.add_argument("--gempyre-title", type=str)
+    parser.add_argument("--gempyre-extra", type=str)
+    parser.add_argument("url", type=str)
+
+    try:
+        args = parser.parse_args()
+    except argparse.ArgumentError:
+        pass
+
+    if args.gempyre_width:
+        width = int(args.gempyre_width)
+
+    if args.gempyre_height:
+        height = int(args.gempyre_height)
+
+    if args.gempyre_title:
+        title = args.gempyre_title
+
+    if args.gempyre_url:
+        uri_string = args.gempyre_url
+    elif args.url:
+        uri_string = args.url
+
+    if sys.platform == 'win32':
+        extra['gui'] = 'cef'
+
+    if args.gempyre_extra:
+        for e in args.gempyre_extra.split(';'):
+            m = re.match(r'^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)\s*$', e)
+            extra[m[1]] = m[2]
+    ##
+
+    uri = urlparse(uri_string)
     window = webview.create_window(title, url=uri_string, width=width, height=height)
     window.shown += lambda: on_show(window, uri.hostname, uri.port)
     window.closing += on_close
@@ -161,39 +215,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-'''
-someday to this:
-parser = argparse.ArgumentParser()
-parser.add_argument("--gempyre-url", type=str)
-parser.add_argument("--gempyre-width", type=int)
-parser.add_argument("--gempyre-height", type=int)
-parser.add_argument("--gempyre-title", type=str)
-parser.add_argument("--gempyre-extra", type=str)
-args = parser.parse_args()
 
-if not args.gempyre_url:
-    parser.error(-1)
-
-extra = {}
-uri = None
-
-try:
-    if args.gempyre_width:
-        width = int(args.gempyre_width)
-
-    if args.gempyre_height:
-        width = int(args.gempyre_height)
-
-    if args.gempyre_title:
-       title = args.gempyre_title
-
-    if sys.platform == 'win32':
-        extra['gui'] = 'cef'
-
-    if args.gempyre_extra:
-        print(args.gempyre_extra)
-        for e in args.gempyre_extra.split(';'):
-            m = re.match(r'^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)\s*$', e)
-            extra[m[1]] = m[2]
-
-'''

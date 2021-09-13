@@ -38,13 +38,6 @@ class CMakeBuild(build_ext):
             os.makedirs(self.build_temp)
         print("Using temp:", self.build_temp)
 
-#        if platform.system() == "Windows":
-#            subprocess.check_call(['runas /user:administratorcmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
- #           subprocess.check_call(['runas /user:administrator cmake', '--build', '.'] + build_args, cwd = self.build_temp)
-#        else:
-        #subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd = self.build_temp)
-        #subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd = self.build_temp)
-
 
 setup (name='Gempyre',
        version='0.6.0',
@@ -61,10 +54,7 @@ Gempyre is C++ Framework for quick and simple UI development and Gempyre-Python 
        cmdclass={'build_ext': CMakeBuild},
        setup_requires=['wheel'],
        install_requires=['pywebview', 'websockets'],
-       scripts=['pyclient.py']
-       #entry_points={
-       #    'console_scripts': ['pyclient=client.pyclient:main']}
-
-  #    setup_requires=['wheel', 'sdist']
+       entry_points={
+           'console_scripts': ['pyclient=client.pyclient:main']}
       )
        
