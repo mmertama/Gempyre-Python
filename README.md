@@ -43,7 +43,7 @@ If you have Python 3.8, the internally used [cefpython3](https://pypi.org/projec
 After install, you just run the script!
 
 <pre>
-$ python3 test/python_test_1.html
+$ python3 test/python_test_1.py
 </pre>
 
 ## API
