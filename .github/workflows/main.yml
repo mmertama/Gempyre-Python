@@ -15,29 +15,34 @@ jobs:
             os: windows-latest,
             build_type: "Release", cc: "cl", cxx: "cl",
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
-            generators: "Visual Studio 16 2019"
+            generators: "Visual Studio 16 2019",
+            binary_mask: "Gempyre*.pyd"
           }
         - {
             name: "Windows Latest MinGW", artifact: "Windows-MinGW.tar.xz",
             os: windows-latest,
             build_type: "Release", cc: "gcc", cxx: "g++",
-            generators: "Ninja"
+            generators: "Ninja",
+            binary_mask: "Gempyre*.pyd"
           }
         - {
             name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
             os: ubuntu-latest,
             build_type: "Release", cc: "gcc", cxx: "g++",
-            generators: "Ninja"
+            generators: "Ninja",
+            binary_mask: "Gempyre*.so"
           }
         - {
             name: "macOS Latest Clang", artifact: "macOS.tar.xz",
             os: macos-latest,
             build_type: "Release", cc: "clang", cxx: "clang++",
-            generators: "Ninja"
+            generators: "Ninja",
+            binary_mask: "Gempyre*.so"
           }
 
     steps:
-    - uses: actions/checkout@v1
+    
+    - uses: actions/checkout@v2  
     
     - name: Install dependencies on windows
       if: startsWith(matrix.config.os, 'windows')
@@ -61,7 +66,46 @@ jobs:
         brew install cmake ninja
         ninja --version
         cmake --version
+   
+    - name: Checkout Gempyre repo
+      uses: actions/checkout@v2
+      with:
+        repository: mmertama/Gempyre
+        path: Gempyre
+
+    - name: Install Gempyre on windows msvc
+      if: startsWith(matrix.config.os, 'windows') && matrix.config.generators != 'Ninja'
+      shell: cmd
+      run: |
+        call "${{ matrix.config.environment_script }}"
+        pushd Gempyre
+        msvc_install.bat
+        popd
     
+    - name: Install Gempyre on windows gcc
+      if: startsWith(matrix.config.os, 'windows') && matrix.config.generators == 'Ninja'
+      shell: cmd
+      run: |
+        pushd Gempyre
+        mingw_install.bat
+        popd    
+
+    - name: Install Gempyre on ubuntu
+      if: startsWith(matrix.config.name, 'ubuntu')
+      shell: bash  
+      run: |
+        pushd Gempyre
+        ./linux_install.sh
+        popd 
+    
+    - name: Install Gempyre on macos
+      if: startsWith(matrix.config.os, 'macos')
+      shell: bash
+      run: |
+        pushd Gempyre
+        ./osx_install.sh
+        popd     
+
     - name: Configure
       shell: cmake -P {0}
       run: |
@@ -84,7 +128,7 @@ jobs:
         endif()
 
         execute_process(
-          COMMAND cmake -S . -B build -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -G Ninja
+          COMMAND cmake -S . -B build -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -G Ninja -Dgempyre_DIR=Gempyre/msvc_build -DCMAKE_MODULE_PATH=Gempyre/msvc_build/gempyrelib
           RESULT_VARIABLE result
         )
         if (NOT result EQUAL 0)
@@ -134,16 +178,11 @@ jobs:
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Running tests failed!")
         endif()
-
-
-    - name: Install Strip
-      run: cmake --install build --prefix instdir --strip
-
-
+    
     - name: Pack
-      working-directory: instdir
-      run: cmake -E tar cJfv ../${{ matrix.config.artifact }} .
-
+      shell: bash
+      run: find . -name ${{ matrix.config.binary_mask }} -exec cmake -E tar cJfv ../${{ matrix.config.artifact }} {} +
+      working-directory: build
 
     - name: Upload
       uses: actions/upload-artifact@v1
