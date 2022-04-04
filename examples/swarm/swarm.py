@@ -138,10 +138,10 @@ class Swarm:
 
 def main():
     print(Gempyre.version())
-    Gempyre.set_debug(Gempyre.DebugLevel.Warning)
+    #Gempyre.set_debug()
     current_dir = os.path.dirname(sys.argv[0])
     file_map, names = resource.from_file(current_dir + "/swarm.html")
-    ui = Gempyre.Ui(file_map, '/swarm.html', 800 + 15, 600 + 20, "Swarm")
+    ui = Gempyre.Ui(file_map, '/swarm.html', "Swarm", 800 + 15, 600 + 20)
     canvas = Gempyre.CanvasElement(ui, "canvas")
     swarm = Swarm(200)
     canvas_rect = Gempyre.Rect()

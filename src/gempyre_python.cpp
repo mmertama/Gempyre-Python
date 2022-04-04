@@ -55,6 +55,7 @@ static void GempyreExtensionCall(Gempyre::Ui* ui, const std::string& callId, con
     ui->extensionCall(callId, params);
 }
 
+/*
 static std::string findBrowser() {
     const auto pyclient = GempyreUtils::which("pyclient");
     if(!pyclient.empty()) {
@@ -76,18 +77,10 @@ static std::string findBrowser() {
         }
     return std::string();
 }
-
+*/
 
 PYBIND11_MODULE(Gempyre, m) {
-    py::enum_<Gempyre::DebugLevel>(m, "DebugLevel")
-    .value("Quiet", Gempyre::DebugLevel::Quiet)
-    .value("Fatal", Gempyre::DebugLevel::Fatal)
-    .value("Error", Gempyre::DebugLevel::Error)
-    .value("Warning", Gempyre::DebugLevel::Warning)
-    .value("Info", Gempyre::DebugLevel::Info)
-    .value("Debug", Gempyre::DebugLevel::Debug)
-    .value("Debug_Trace", Gempyre::DebugLevel::Debug_Trace);
-    m.def("set_debug", &Gempyre::setDebug, py::arg("level") = Gempyre::DebugLevel::Warning);
+    m.def("set_debug", &Gempyre::setDebug, py::arg("is_debug") = true);
     m.def("version", &Gempyre::version);
     m.def("html_file_launch_cmd", &GempyreUtils::htmlFileLaunchCmd); //is this the only function fom GempyreUtils? Therefore attached here
 
@@ -133,59 +126,27 @@ PYBIND11_MODULE(Gempyre, m) {
             .def("rect", [](Gempyre::Element* el) {
                 const auto r = el->rect();
                 return r ? std::make_optional<RectF>(::rectF(*r)) :  std::nullopt;
-                })
-//            .def("rect", &Gempyre::Element::rect)
-            ;
+                });
     py::class_<Gempyre::Ui>(m, "Ui")
-       // Should I comment these out as using them is confusing due browser security concerns
-        .def(py::init<const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
-             py::arg("indexHtml"),
-             py::arg("browser") = findBrowser(),
-             py::arg("extraParams") = "",
-             py::arg("port") = Gempyre::Ui::UseDefaultPort,
-             py::arg("root") = Gempyre::Ui::UseDefaultRoot
-             )
-         .def(py::init<const std::string&, const std::string&, int, int, const std::string&, const std::string&, unsigned short, const std::string& >(),
-             py::arg("indexHtml"),
-             py::arg("width"),
-             py::arg("height"),
-             py::arg("title"),
-             py::arg("browser") = findBrowser(),
-             py::arg("extraParams") = "",
-             py::arg("port") = Gempyre::Ui::UseDefaultPort,
-             py::arg("root") = Gempyre::Ui::UseDefaultRoot
-             )
-        /*.def(py::init<const std::string&, unsigned short, const std::string& >(),
-                 py::arg("indexHtml"),
-                 py::arg("port") = Gempyre::Ui::UseDefaultPort,
-                 py::arg("root") = Gempyre::Ui::UseDefaultRoot
-                 ) */
-        .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, int, int, const std::string&,
-         const std::string&, const std::string&, unsigned short, const std::string& >(),
+        .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, int, int, int,
+         unsigned int, const std::string& >(),
              py::arg("filemap"),
-             py::arg("indexHtml"),
-             py::arg("width"),
-             py::arg("height"),
-             py::arg("title"),
-             py::arg("browser") = findBrowser(),
-             py::arg("extraParams") = "",
+             py::arg("index_html"),
+             py::arg("title") = "",
+             py::arg("width") = -1,
+             py::arg("height") = -1,
+             py::arg("flags") = 0,
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
              )
-         .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, const std::string&, unsigned short, const std::string& >(),
+         .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, const std::string&, unsigned int, const std::string& >(),
              py::arg("filemap"),
-             py::arg("indexHtml"),
-             py::arg("browser") = findBrowser(),
-             py::arg("extraParams") = "",
+             py::arg("index_html"),
+             py::arg("browser"),
+             py::arg("browser_params"),
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
              )
-        /*.def(py::init<const Gempyre::Ui::Filemap&, const std::string&, unsigned short, const std::string& >(),
-             py::arg("filemap"),
-             py::arg("indexHtml"),
-             py::arg("port") = Gempyre::Ui::UseDefaultPort,
-             py::arg("root") = Gempyre::Ui::UseDefaultRoot
-            )*/
         .def_readonly_static("UseDefaultPort", &Gempyre::Ui::UseDefaultPort)
         .def_readonly_static("UseDefaultRoot", &Gempyre::Ui::UseDefaultRoot)
         .def("run", &Gempyre::Ui::run, py::call_guard<py::gil_scoped_release>())
@@ -246,7 +207,7 @@ PYBIND11_MODULE(Gempyre, m) {
             f(tid);
             });
         })
-        .def("cancel", &Gempyre::Ui::cancel)
+        .def("cancel_timer", &Gempyre::Ui::cancelTimer)
         .def("root", &Gempyre::Ui::root)
         .def("address_of", &Gempyre::Ui::addressOf)
         .def("by_class", &Gempyre::Ui::byClass)
@@ -362,24 +323,28 @@ PYBIND11_MODULE(Gempyre, m) {
         py::class_<Gempyre::Dialog>(m, "Dialog")
             .def(py::init())
             
-            .def("open_file_dialog", [](Gempyre::Ui* ui, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::string> {
+            .def("open_file_dialog", [](Gempyre::Dialog* self, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::string> {
+                (void) self;
                 py::gil_scoped_acquire acquire;
-                return Gempyre::Dialog::openFileDialog(*ui, caption, root, filter);
+                return Gempyre::Dialog::openFileDialog(caption, root, filter);
             }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=Gempyre::Dialog::Filter())
             
-            .def("open_files_dialog", [](Gempyre::Ui* ui, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::vector<std::string>> {
+            .def("open_files_dialog", [](Gempyre::Dialog* self, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::vector<std::string>> {
+                (void) self;
                 py::gil_scoped_acquire acquire;
-                return Gempyre::Dialog::openFilesDialog(*ui, caption, root, filter);
+                return Gempyre::Dialog::openFilesDialog(caption, root, filter);
             }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=Gempyre::Dialog::Filter())
             
-            .def("open_dir_dialog", [](Gempyre::Ui* ui, const std::string& caption, const std::string& root)->std::optional<std::string> {
+            .def("open_dir_dialog", [](Gempyre::Dialog* self, const std::string& caption, const std::string& root)->std::optional<std::string> {
+                (void) self;
                 py::gil_scoped_acquire acquire;
-                return Gempyre::Dialog::openDirDialog(*ui, caption, root);
+                return Gempyre::Dialog::openDirDialog(caption, root);
             }, py::arg("caption")="", py::arg("root")="")
             
-            .def("save_file_dialog", [](Gempyre::Ui* ui, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::string> {
+            .def("save_file_dialog", [](Gempyre::Dialog* self, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::string> {
+                (void) self;
                 py::gil_scoped_acquire acquire;
-                return Gempyre::Dialog::saveFileDialog(*ui, caption, root, filter);
+                return Gempyre::Dialog::saveFileDialog(caption, root, filter);
             }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=Gempyre::Dialog::Filter())
             ;
 }

@@ -71,16 +71,3 @@ add_custom_command(
     )
 
 target_link_libraries (Gempyre PRIVATE gempyre::gempyre)
-
-#add_custom_command(
-#    TARGET Gempyre
-#    POST_BUILD
-#    COMMAND ${PYTHON3} -m pip install --user -q -r ${GEMPYRE_DIR}/affiliates/py_client/requirements.txt
-#    )
-
-#add_custom_command(
-#    TARGET Gempyre
-#    POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy
-#            ${GEMPYRE_DIR}/affiliates/py_client/pyclient.py
-#            ${Python_SITELIB}/pyclient.py)
