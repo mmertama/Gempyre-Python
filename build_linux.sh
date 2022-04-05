@@ -1,3 +1,5 @@
+
+
 PYDEV_INSTALLED=$(dpkg-query -W -f='${Status}' python3-dev 2>/dev/null | grep -c "ok installed")
 if [[ "$PYDEV_INSTALLED" -eq "0" ]]; then
   echo "Python3 dev is missing...apt-get install it, please"	
@@ -13,22 +15,44 @@ fi
 mkdir -p build
 pushd build
 
-if [[ ! $(find /usr -name "gempyreConfig.cmake" 2>/dev/null) ]]; then
-  git clone https://github.com/mmertama/Gempyre.git
-  pushd Gempyre
-  ./linux_install.sh
-  popd
-fi
-
 
 PY_VER_LONG=$(python3 --version)
 PY_VER=$(echo "${PY_VER_LONG}" | grep -o '[0-9]\+.[0-9]\+')
 
-cmake .. -DCMAKE_BUILD_TYPE=RELEASE
-cmake --build . --config Release
+IS_RASPEBERRY=$(python3 -c 'import platform; print("raspberrypi" in platform.uname())')
 
-mkdir -p lib.linux-x86_64-${PY_VER}
-cp ./Gempyre.cpython-*.so lib.linux-x86_64-${PY_VER}/
+if [ "$IS_RASPEBERRY"=="True" ]; then
+  echo This is Raspberry!
+  EXTRA="-DRASPBERRY=1"
+fi
+
+set +e  
+
+cmake .. -DCMAKE_BUILD_TYPE=RELEASE $EXTRA
+rval=$?
+if [ $rval -ne 0 ]; then
+  echo "Is Gempyre installed? See https://github.com/mmertama/Gempyre"
+  popd
+  exit
+fi  
+
+cmake --build . --config Release
+rval=$?
+if [ $rval -ne 0 ]; then
+  popd
+  return
+fi
+
+set -e  
+
+if [ "$IS_RASPEBERRY"=="True" ]; then
+  ARCH=$(uname -m)
+  mkdir -p lib.linux-${ARCH}-${PY_VER}
+  cp ./Gempyre.cpython-*.so lib.linux-${ARCH}-${PY_VER}/
+else
+  mkdir -p lib.linux-x86_64-${PY_VER}
+  cp ./Gempyre.cpython-*.so lib.linux-x86_64-${PY_VER}/
+fi  
 
 pip3 install -e .. --user
 

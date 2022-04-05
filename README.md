@@ -4,6 +4,9 @@ The easy and productive UI library for Python.
 
 ## Build
 
+Install Gempyre (https://github.com/mmertama/Gempyre.git), see Gempyre
+installation. 
+
 Clone Gempyre-Python (https://github.com/mmertama/Gempyre-Python.git)
 
 Build scripts are for spesific OS/Python versions - but they are only three lines and shall not be a problem.
@@ -15,7 +18,7 @@ mv *.so build/lib.linux-x86_64-3.6/
 pip3 install -e . --user
 </pre>
 
-### For Linux
+### For Linux (including Raspberry OS)
 * $ git clone https://github.com/mmertama/Gempyre-Python.git
 * $ ./build_linux.sh
 
