@@ -12,18 +12,14 @@ pushd msvc_build
 if exist "C:\Program Files (x86)\gempyre" goto found
 if exist "C:\Program Files\gempyre" goto found
 
-git clone https://github.com/mmertama/Gempyre.git
-pushd Gempyre
-call msvc_install.bat
-popd
+echo "Gempyre not installed"
+goto exit
 
 :found
 
 cmake .. -DCMAKE_BUILD_TYPE=Release
+if %ERRORLEVEL% NEQ 0 popd && exit /b %ERRORLEVEL%
 cmake --build . --config Release
-
-if not exist "..\build\lib.win-amd64-3.8" mkdir ..\build\lib.win-amd64-3.8
-move /Y Release\*.pyd ..\build\lib.win-amd64-3.8\ 
 pip3 install -e .. --user
 
 popd

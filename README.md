@@ -9,37 +9,91 @@ installation.
 
 Clone Gempyre-Python (https://github.com/mmertama/Gempyre-Python.git)
 
-Build scripts are for spesific OS/Python versions - but they are only three lines and shall not be a problem.
+You need python3-dev and python3-pip be installed.
 
-For example Linux script looks something like this
-<pre>
-cmake --build . --config Release
-mv *.so build/lib.linux-x86_64-3.6/
-pip3 install -e . --user
-</pre>
+I mostly assume Python 3.8, but if you have python 3.9 installed, then 
+bash```
+pip install --pre pythonnet
+```
+may be needed.
 
-### For Linux (including Raspberry OS)
-* $ git clone https://github.com/mmertama/Gempyre-Python.git
-* $ ./build_linux.sh
+### For Linux
+```bash
+  cmake .. -DCMAKE_BUILD_TYPE=RELEASE
+  cmake --build . --config Release
+  pip3 install -e . --user
+```
+
+### For Raspberry OS
+```bash
+  cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DRASPBERRY=1
+  cmake --build . --config Release
+  pip3 install -e . --user
+```
+
 
 ### For MacOS
-* $ git clone https://github.com/mmertama/Gempyre-Python.git
-* $ ./build_osx.sh
+```bash
+  mkdir -p build
+  pushd build
+  cmake .. -DCMAKE_BUILD_TYPE=RELEASE
+  cmake --build . --config Release
+  pip3 install -e . --user
+  popd
+```
 
-### For Windows:
-* install git bash https://gitforwindows.org/
-* $ git clone https://github.com/mmertama/Gempyre-Python.git
-* install cmake https://cmake.org/download/ (let it to be added in path)
-* install Visual Studio https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2019
-		* pick Desktop development with C++
-* install Python 3.7 (3.6 >= shall be ok) https://www.python.org/downloads/windows/
-* Open x64 Native Tools Command Prompt for VS 2019
-* run msvc_build at Gempyre-Python folder
+### For Windows
+* For Windows you use either MSVC (at least Visual Studio 19) toolchain, or
+MinGW 64-bit. Please note that in Windows you may have several Pythons's installed. 
+There may at least be one Windows provided and one that come along MinGW or MSys.
 
-If you have Python 3.8, the internally used [cefpython3](https://pypi.org/project/cefpython3/) does not support Python 3.8 (other OS alternatives can be used and thus this apply only on Windows). Hopefully the support will be soon available. But meanwhile:
-	<code>ui = Gempyre.Ui(map, names[name]) if sys.platform != 'win32' or sys.version_info < (3,8) else Gempyre.Ui(map, names[name], "")
-</code>
-	when creating a Gempyre, should be a quick workaround. That is use the system browser instead (if nothing else works, Chrome should). The "" parameter set system default, but you can set there any browser call, see [Gempyre Documentation](https://github.com/mmertama/Gempyre/blob/master/gempyre.md#explicit-uiconst-stdstring-indexhtml-const-stdstring-browser-const-stdstring-extraparams---unsigned-short-port--usedefaultport-const-stdstring-root--usedefaultroot).
+Use respective pip3 of which Python you want to use. In the examples below the MSVC built
+is installed to Windows system Python (as started from Command Prompt), and MinGW version is
+is installed to MinGW shell as installed within that environment. 
+
+Use 
+```bash
+py -0p
+```
+and
+
+```bash
+which python3
+```
+
+```bash
+where python3
+```
+
+To figure out the installed Python path.
+
+#### For Windows MSVC
+    * From Windows menu, Visual Studio: Open "x64 Native Tools Command Prompt for VS 2019"
+```bash
+    if not exist "msvc_build" mkdir msvc_build
+    pushd msvc_build
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    cmake --build . --config Release
+    pip3 install -e .. --user
+    popd
+```
+pushd msvc_build
+#### For Windows MinGW
+    * To install pip:  ```bash
+    pacman -S mingw-w64-x86_64-python-pip
+    ```
+     * To install python:  ```bash
+    pacman -S mingw-w64-i686-python3
+    ```
+    * Make sure you are using the right MinGW shell (Msys minGW 64-bit - one with blue icon (Not brown or cyan :-))
+    ```bash
+    if not exist "msvc_build" mkdir msvc_build
+    pushd msvc_build
+    $ cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DPYTHON_PATH=C:\\msys64\\mingw64\\bin
+    cmake --build . --config Release
+    pip3 install -e .. --user
+    popd
+```
 
 ### Run
 
@@ -51,7 +105,7 @@ $ python3 test/python_test_1.py
 
 ## API
 
-See examples how to use: [telex_test](https://github.com/mmertama/Gempyre-Python/blob/master/test/telex_test.py)
+See examples how to use e.g. [telex_test](https://github.com/mmertama/Gempyre-Python/blob/master/test/telex_test.py)
 
 The programming interface is very same as in [Gempyre](https://github.com/mmertama/Gempyre.git)
 - except I changed function and method name naming from CamelCase to more pythonic snake_case (Im not sure if that was a right choice).
@@ -66,18 +120,39 @@ Please note that Gempyre Core and Gempyre Graphics are part of Python API, but n
 
 ```py
 import Gempyre
+import os
+import sys
+from Gempyre_utils import resource
 
-ui = Gempyre.Ui("example.html")
+name = os.path.join(os.path.dirname(sys.argv[0]), "hello.html")
+map, names = resource.from_file(name)
+ui = Gempyre.Ui(map, names[name])
 ui.run()
 ```
+
+#### HTML
+Assumed to be found in the same folder as the script
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+  <script src="/gempyre.js"></script>
+  Hello!
+</body>
+</html>
+
 
 ### Application with interaction
 #### Python
 ```py
-import Gempyre
 
 def main():
-    ui = Gempyre.Ui("example2.html")
+    name = os.path.join(os.path.dirname(sys.argv[0]), "example2.html")
+    map, names = resource.from_file(name)
+    ui = Gempyre.Ui(map, names[name])
     output = Gempyre.Element(ui, "output")
     open_button = Gempyre.Element(ui, "open")
     open_button.subscribe("click", lambda _: output.set_html("Hello"))

@@ -10,10 +10,9 @@ mkdir -p build
 pushd build
 
 if [[ ! $(find /usr -name "gempyreConfig.cmake" 2> /dev/null) ]]; then
-  git clone https://github.com/mmertama/Gempyre.git
-  pushd Gempyre
-  ./osx_install.sh
+  echo "Gempyre is not installed"
   popd
+  exit 1
 fi
 
 cmake .. -DCMAKE_BUILD_TYPE=Release
