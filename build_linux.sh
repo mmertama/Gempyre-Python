@@ -1,5 +1,4 @@
 
-
 PYDEV_INSTALLED=$(dpkg-query -W -f='${Status}' python3-dev 2>/dev/null | grep -c "ok installed")
 if [[ "$PYDEV_INSTALLED" -eq "0" ]]; then
   echo "Python3 dev is missing...apt-get install it, please"	
@@ -12,6 +11,8 @@ if [[ "$PIP3_INSTALLED" -eq "0" ]]; then
    sudo apt-get install python3-pip 
 fi	
 
+set -e
+
 mkdir -p build
 pushd build
 
@@ -19,9 +20,9 @@ pushd build
 PY_VER_LONG=$(python3 --version)
 PY_VER=$(echo "${PY_VER_LONG}" | grep -o '[0-9]\+.[0-9]\+')
 
-IS_RASPEBERRY=$(python3 -c 'import platform; print("raspberrypi" in platform.uname())')
+IS_RASPEBERRY=$(python3 -c "import platform; print('raspberrypi' in platform.uname())")
 
-if [ "$IS_RASPEBERRY"=="True" ]; then
+if [ $IS_RASPEBERRY == "True" ]; then
   echo This is Raspberry!
   EXTRA="-DRASPBERRY=1"
 fi
@@ -42,17 +43,6 @@ if [ $rval -ne 0 ]; then
   popd
   return
 fi
-
-set -e  
-
-if [ "$IS_RASPEBERRY"=="True" ]; then
-  ARCH=$(uname -m)
-  mkdir -p lib.linux-${ARCH}-${PY_VER}
-  cp ./Gempyre.cpython-*.so lib.linux-${ARCH}-${PY_VER}/
-else
-  mkdir -p lib.linux-x86_64-${PY_VER}
-  cp ./Gempyre.cpython-*.so lib.linux-x86_64-${PY_VER}/
-fi  
 
 pip3 install -e .. --user
 

@@ -9,7 +9,7 @@ installation.
 
 Clone Gempyre-Python (https://github.com/mmertama/Gempyre-Python.git)
 
-You need python3-dev and python3-pip be installed.
+You need python3-dev and python3-pip be installed. This may depend on your evironment, e.g. apt-get install python3-dev.
 
 I mostly assume Python 3.8, but if you have python 3.9 installed, then 
 bash```
@@ -19,7 +19,7 @@ may be needed.
 
 ### For Linux
 ```bash
-  cmake .. -DCMAKE_BUILD_TYPE=RELEASE
+  cmake ..
   cmake --build . --config Release
   pip3 install -e . --user
 ```
