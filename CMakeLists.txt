@@ -30,11 +30,11 @@ elseif(MINGW)
                     COMMAND ${PYTHON3} --version
                     OUTPUT_VARIABLE PY_VERSION)
         string(REGEX MATCHALL [0-9]+ VER ${PY_VERSION})
-        list(GET VER 0 Python_VERSION_MAJOR)
-        list(GET VER 1 Python_VERSION_MINOR)
+        list(GET VER 0 Python3_VERSION_MAJOR)
+        list(GET VER 1 Python3_VERSION_MINOR)
         get_filename_component(PARENT_DIR ${PYTHON_PATH} DIRECTORY)
         find_path(PYTHON_HEADER_PATH "Python.h" 
-            HINTS "${PARENT_DIR}/include/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" REQUIRED)
+            HINTS "${PARENT_DIR}/include/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}" REQUIRED)
         set(PYTHON_INCLUDE_PATH ${PYTHON_HEADER_PATH})
     endif()        
 else() 
@@ -44,7 +44,6 @@ else()
     if(NOT Python3)
         find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
     endif() 
-    
     find_path(PYTHON_HEADER_PATH "Python.h" HINTS ${Python3_INCLUDE_DIRS})
 endif()
 
@@ -90,12 +89,11 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/README.md
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 
-if(NOT DEFINED Python_VERSION_MAJOR)
-	set(Python_VERSION_MAJOR 3)
-	set(Python_VERSION_MINOR 8)
+if(NOT DEFINED Python3_VERSION_MAJOR)
+	message(FATAL_ERROR "Cannot define Python version")
 endif()
 
-set(PY_VER "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
+set(PY_VER "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}")
 
 set(PYBIND11_PYTHON_VERSION ${PY_VER})
 pybind11_add_module(Gempyre
@@ -111,6 +109,17 @@ if(MSVC)
 	set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.win-amd64-${PY_VER}")
 elseif(MINGW)
 	set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.mingw_x86_64-${PY_VER}")
+elseif(APPLE)
+    execute_process(
+        COMMAND uname "-m"
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE ARCH)
+    execute_process(
+        COMMAND defaults read loginwindow SystemVersionStampAsString
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE OS_VER_LONG)
+    string(REGEX MATCH "[0-9]+.[0-9]+" OS_VER ${OS_VER_LONG})
+    set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.macosx-${OS_VER}-${ARCH}-${PY_VER}")    
 elseif(UNIX)
     execute_process(
         COMMAND uname "-m"

@@ -19,16 +19,22 @@ may be needed.
 
 ### For Linux
 ```bash
+  mkdir -p build
+  pushd build
   cmake ..
   cmake --build . --config Release
-  pip3 install -e . --user
+  pip3 install -e .. --user
+  popd
 ```
 
 ### For Raspberry OS
 ```bash
+  mkdir -p build
+  pushd build
   cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DRASPBERRY=1
   cmake --build . --config Release
-  pip3 install -e . --user
+  pip3 install -e .. --user
+  popd
 ```
 
 
@@ -38,7 +44,7 @@ may be needed.
   pushd build
   cmake .. -DCMAKE_BUILD_TYPE=RELEASE
   cmake --build . --config Release
-  pip3 install -e . --user
+  pip3 install -e .. --user
   popd
 ```
 
