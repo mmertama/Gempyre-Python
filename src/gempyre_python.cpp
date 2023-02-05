@@ -29,7 +29,7 @@ static RectF rectF(const Gempyre::Element::Rect& r) {
 static std::optional<std::string> GempyreExtensionGet(Gempyre::Ui* ui, const std::string& callId, const std::unordered_map<std::string, std::string>& parameters) {
     std::unordered_map<std::string, std::any> params;
     for(const auto& [k, v] : parameters) {
-        const auto any = GempyreUtils::jsonToAny(v); // Not sure how well tested
+        const auto any = GempyreUtils::json_to_any(v); // Not sure how well tested
         if(any)
             params.emplace(k, any);
          else {
@@ -37,14 +37,14 @@ static std::optional<std::string> GempyreExtensionGet(Gempyre::Ui* ui, const std
             return std::nullopt;
         }
     }
-    std::optional<std::any> ext =  ui->extensionGet(callId, params);
-    return ext ? GempyreUtils::toJsonString(*ext) : std::nullopt;
+    std::optional<std::any> ext =  ui->extension_get(callId, params);
+    return ext ? GempyreUtils::to_json_string(*ext) : std::nullopt;
 }
 
 static void GempyreExtensionCall(Gempyre::Ui* ui, const std::string& callId, const std::unordered_map<std::string, std::string>& parameters) {
     std::unordered_map<std::string, std::any> params;
     for(const auto& [k, v] : parameters) {
-        const auto any = GempyreUtils::jsonToAny(v); // Not sure how well tested
+        const auto any = GempyreUtils::json_to_any(v); // Not sure how well tested
         if(any)
             params.emplace(k, any);
          else {
@@ -52,7 +52,7 @@ static void GempyreExtensionCall(Gempyre::Ui* ui, const std::string& callId, con
             return;
         }
     }
-    ui->extensionCall(callId, params);
+    ui->extension_call(callId, params);
 }
 
 /*
@@ -80,9 +80,9 @@ static std::string findBrowser() {
 */
 
 PYBIND11_MODULE(Gempyre, m) {
-    m.def("set_debug", &Gempyre::setDebug, py::arg("is_debug") = true);
+    m.def("set_debug", &Gempyre::set_debug, py::arg("is_debug") = true);
     m.def("version", &Gempyre::version);
-    m.def("html_file_launch_cmd", &GempyreUtils::htmlFileLaunchCmd); //is this the only function fom GempyreUtils? Therefore attached here
+    m.def("html_file_launch_cmd", &GempyreUtils::html_file_launch_cmd); //is this the only function fom GempyreUtils? Therefore attached here
 
     py::class_<Gempyre::Event>(m, "Event")
             .def_readonly("element", &Gempyre::Event::element)
@@ -111,11 +111,11 @@ PYBIND11_MODULE(Gempyre, m) {
                      py::gil_scoped_acquire acquire; handler(ev);
                  }, properties, throttle);
                 }, py::arg("name"), py::arg("handler"), py::arg("properties") = std::vector<std::string>{}, py::arg("throttle") = 0ms)
-            .def("set_html", &Gempyre::Element::setHTML)
-            .def("set_attribute", &Gempyre::Element::setAttribute, py::arg("attr"), py::arg("value") = "")
-            .def("remove_attribute", &Gempyre::Element::removeAttribute)
-            .def("set_style", &Gempyre::Element::setStyle)
-            .def("remove_style", &Gempyre::Element::removeStyle)
+            .def("set_html", &Gempyre::Element::set_html)
+            .def("set_attribute", &Gempyre::Element::set_attribute, py::arg("attr"), py::arg("value") = "")
+            .def("remove_attribute", &Gempyre::Element::remove_attribute)
+            .def("set_style", &Gempyre::Element::set_style)
+            //.def("remove_style", &Gempyre::Element::removeStyle)
             .def("styles", &Gempyre::Element::styles)
             .def("attributes", &Gempyre::Element::attributes)
             .def("children", &Gempyre::Element::children)
@@ -153,43 +153,43 @@ PYBIND11_MODULE(Gempyre, m) {
         .def("exit", &Gempyre::Ui::exit)
         .def("close", &Gempyre::Ui::close)
         .def("on_exit", [](Gempyre::Ui* ui, std::function<void ()> onExitFunction = nullptr)->Gempyre::Ui& {
-            return ui->onExit(onExitFunction ? [onExitFunction]() {
+            return ui->on_exit(onExitFunction ? [onExitFunction]() {
                 py::gil_scoped_acquire acquire;
                 return onExitFunction();
             } : static_cast<decltype(onExitFunction)>(nullptr));
         })
         .def("on_reload", [](Gempyre::Ui* ui, std::function<void ()> onReloadFunction = nullptr)->Gempyre::Ui& {
-        return ui->onReload(onReloadFunction ? [onReloadFunction]() {
+        return ui->on_reload(onReloadFunction ? [onReloadFunction]() {
             py::gil_scoped_acquire acquire;
             return onReloadFunction();
         } : static_cast<decltype(onReloadFunction)>(nullptr));
         })
         .def("on_open", [](Gempyre::Ui* ui, std::function<void ()> onOpenFunction = nullptr)->Gempyre::Ui& {
-        return ui->onOpen(onOpenFunction ? [onOpenFunction]() {
+        return ui->on_open(onOpenFunction ? [onOpenFunction]() {
             py::gil_scoped_acquire acquire;
             return onOpenFunction();
         } : static_cast<decltype(onOpenFunction)>(nullptr));
         })
         .def("on_error", [](Gempyre::Ui* ui, std::function<void (const std::string& element, const std::string& info)> onErrorFunction = nullptr)->Gempyre::Ui& {
-            return ui->onError(onErrorFunction ? [onErrorFunction](const std::string& element, const std::string& info) {
+            return ui->on_error(onErrorFunction ? [onErrorFunction](const std::string& element, const std::string& info) {
                 py::gil_scoped_acquire acquire;
                 return onErrorFunction(element, info);
             } : static_cast<decltype(onErrorFunction)>(nullptr));
         })
-        .def("set_logging", &Gempyre::Ui::setLogging)
+        .def("set_logging", &Gempyre::Ui::set_logging)
         .def("eval", &Gempyre::Ui::eval)
         .def("debug", &Gempyre::Ui::debug)
         .def("alert", &Gempyre::Ui::alert)
         .def("open", &Gempyre::Ui::open, py::arg("url"), py::arg("name") = "")
         .def("start_periodic", [](Gempyre::Ui* ui, const std::chrono::milliseconds& ms, const std::function<void ()>& f) {
-            return ui->startPeriodic(ms, [f]() {
+            return ui->start_periodic(ms, [f]() {
                 py::gil_scoped_acquire acquire;
                 f();
             });
         })
         // When wrapping in fp (to enable GIL), there is no need: py::overload_cast<const std::chrono::milliseconds&, bool, const std::function<void (Gempyre::Ui::TimerId)>&>(&Gempyre::Ui::startTimer)
         .def("start_periodic_id", [](Gempyre::Ui* ui, const std::chrono::milliseconds& ms, const std::function<void (Gempyre::Ui::TimerId)>& f) {
-            return ui->startPeriodic(ms, [f](Gempyre::Ui::TimerId tid) {
+            return ui->start_periodic(ms, [f](Gempyre::Ui::TimerId tid) {
                 py::gil_scoped_acquire acquire;
                 f(tid);
             });
@@ -207,23 +207,23 @@ PYBIND11_MODULE(Gempyre, m) {
             f(tid);
             });
         })
-        .def("cancel_timer", &Gempyre::Ui::cancelTimer)
+        .def("cancel_timer", &Gempyre::Ui::cancel_timer)
         .def("root", &Gempyre::Ui::root)
-        .def("address_of", &Gempyre::Ui::addressOf)
-        .def("by_class", &Gempyre::Ui::byClass)
-        .def("by_name", &Gempyre::Ui::byName)
+        .def("address_of", &Gempyre::Ui::address_of)
+        .def("by_class", &Gempyre::Ui::by_class)
+        .def("by_name", &Gempyre::Ui::by_name)
         .def("ping", &Gempyre::Ui::ping)
         .def("extension_get", &GempyreExtensionGet)
         .def("extension_call", &GempyreExtensionCall)
         .def("resource", &Gempyre::Ui::resource)
         .def("add_file_url", [](Gempyre::Ui* ui, const std::string& url, const std::string& file) {
-                    return ui->addFile(url, file);
+                    return ui->add_file(url, file);
          })
-        .def("begin_batch", &Gempyre::Ui::beginBatch)
-        .def("end_batch", &Gempyre::Ui::endBatch)
-        .def("hold_timers", &Gempyre::Ui::holdTimers)
-        .def("is_hold", &Gempyre::Ui::isHold)
-        .def("device_pixel_ratio", &Gempyre::Ui::devicePixelRatio)
+        .def("begin_batch", &Gempyre::Ui::begin_batch)
+        .def("end_batch", &Gempyre::Ui::end_batch)
+        .def("set_timer__on_hold", &Gempyre::Ui::set_timer_on_hold)
+        .def("is_timer__on_hold", &Gempyre::Ui::is_timer_on_hold)
+        .def("device_pixel_ratio", &Gempyre::Ui::device_pixel_ratio)
             ;
 
         py::class_<Gempyre::CanvasElement, Gempyre::Element>(m, "CanvasElement")
@@ -231,26 +231,26 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def(py::init<Gempyre::Ui&, const std::string&>())
                 .def(py::init<Gempyre::Ui&, const std::string&, const Gempyre::Element&>())
                 .def("add_image", [](Gempyre::CanvasElement* canvas, const std::string& url, const std::function<void (const std::string&)> loaded = nullptr){
-                    return canvas->addImage(url, [loaded](const std::string& id) {if(loaded) {py::gil_scoped_acquire acquire; loaded(id);}});})
+                    return canvas->add_image(url, [loaded](const std::string& id) {if(loaded) {py::gil_scoped_acquire acquire; loaded(id);}});})
                 .def("add_images", [](Gempyre::CanvasElement* canvas, const std::vector<std::string> urls, const std::function<void (const std::vector<std::string>&)>& loaded = nullptr) {
-                    return canvas->addImages(urls, [loaded](const std::vector<std::string>& vec) {if(loaded) {py::gil_scoped_acquire acquire; loaded(vec);}});})
+                    return canvas->add_images(urls, [loaded](const std::vector<std::string>& vec) {if(loaded) {py::gil_scoped_acquire acquire; loaded(vec);}});})
                 .def("paint_image", [](Gempyre::CanvasElement* el, const std::string& imageId, int x, int y, const RectF& clippingRect) {
-                    el->paintImage(imageId, x, y, clippingRect);
+                    el->paint_image(imageId, x, y, clippingRect);
                     }, py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
                 .def("paint_image_rect", [](Gempyre::CanvasElement* el, const std::string& imageId, const RectF& targetRect, const RectF& clippingRect) {
-                    el->paintImage(imageId, targetRect, clippingRect);
+                    el->paint_image(imageId, targetRect, clippingRect);
                     }, py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
                 .def("draw_commands", py::overload_cast<const Gempyre::CanvasElement::CommandList&>(&Gempyre::CanvasElement::draw, py::const_))
                 .def("draw_frame", py::overload_cast<const Gempyre::FrameComposer&>(&Gempyre::CanvasElement::draw, py::const_))
                 .def("erase", &Gempyre::CanvasElement::erase, py::arg("resized") = false)
                 .def("draw_completed", [](Gempyre::CanvasElement* canvas, const std::function<void ()>& drawCallback)->void {
-                    canvas->drawCompleted(drawCallback ? [drawCallback]() {
+                    canvas->draw_completed(drawCallback ? [drawCallback]() {
                         py::gil_scoped_acquire acquire;
                         drawCallback();
                     } : static_cast<decltype(drawCallback)>(nullptr));
                 })
                 ;
-        m.def("color_rgba_clamped", &Gempyre::Color::rgbaClamped, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF);
+        m.def("color_rgba_clamped", &Gempyre::Color::rgba_clamped, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF);
         m.def("color_rgba", py::overload_cast<uint32_t, uint32_t, uint32_t, uint32_t>(&Gempyre::Color::rgba), py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF);
         m.def("color_rgba_string", py::overload_cast<uint32_t>(&Gempyre::Color::rgba));
         m.def("color_rgb_string", py::overload_cast<uint32_t>(&Gempyre::Color::rgb));
@@ -273,11 +273,11 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def_property_readonly_static("Red", [](py::object){return Gempyre::Graphics::Red;})
                 .def_property_readonly_static("Green", [](py::object){return Gempyre::Graphics::Green;})
                 .def_property_readonly_static("Blue", [](py::object){return Gempyre::Graphics::Blue;})
-                .def("set_pixel", &Gempyre::Graphics::setPixel)
-                .def("set_alpha", &Gempyre::Graphics::setAlpha)
+                .def("set_pixel", &Gempyre::Graphics::set_pixel)
+                .def("set_alpha", &Gempyre::Graphics::set_alpha)
                 .def("width", &Gempyre::Graphics::width)
                 .def("height", &Gempyre::Graphics::height)
-                .def("draw_rect", [](Gempyre::Graphics* g, const RectF& r, Gempyre::Color::type c) {g->drawRect(r, c);})
+                .def("draw_rect", [](Gempyre::Graphics* g, const RectF& r, Gempyre::Color::type c) {g->draw_rect(r, c);})
                 .def("merge", &Gempyre::Graphics::merge)
                 .def("swap", &Gempyre::Graphics::swap)
                 .def("update", &Gempyre::Graphics::update)
@@ -287,36 +287,37 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def(py::init<>())
                 .def(py::init<Gempyre::CanvasElement::CommandList&>())
                 .def(py::init<const Gempyre::FrameComposer&>())
-                .def("stroke_rect", [](Gempyre::FrameComposer* fc, const RectF& r) {fc->strokeRect(r);})
-                .def("clear_rect", [](Gempyre::FrameComposer* fc, const RectF& r) {fc->clearRect(r);})
-                .def("fill_rect", [](Gempyre::FrameComposer* fc, const RectF& r) {fc->fillRect(r);})
-                .def("fill_text", &Gempyre::FrameComposer::fillText)
-                .def("stroke_text", &Gempyre::FrameComposer::strokeText)
+                .def("stroke_rect", [](Gempyre::FrameComposer* fc, const RectF& r) {fc->stroke_rect(r);})
+                .def("clear_rect", [](Gempyre::FrameComposer* fc, const RectF& r) {fc->clear_rect(r);})
+                .def("fill_rect", [](Gempyre::FrameComposer* fc, const RectF& r) {fc->fill_rect(r);})
+                .def("fill_text", &Gempyre::FrameComposer::fill_text)
+                .def("stroke_text", &Gempyre::FrameComposer::stroke_text)
                 .def("arc", &Gempyre::FrameComposer::arc)
                 .def("ellipse", &Gempyre::FrameComposer::ellipse)
-                .def("begin_path", &Gempyre::FrameComposer::beginPath)
-                .def("close_path", &Gempyre::FrameComposer::closePath)
-                .def("line_to", &Gempyre::FrameComposer::lineTo)
-                .def("move_to", &Gempyre::FrameComposer::moveTo)
-                .def("bezier_curve_to", &Gempyre::FrameComposer::bezierCurveTo)
-                .def("quadratic_curve_to", &Gempyre::FrameComposer::quadraticCurveTo)
-                .def("arc_to", &Gempyre::FrameComposer::arcTo)
+                .def("begin_path", &Gempyre::FrameComposer::begin_path)
+                .def("close_path", &Gempyre::FrameComposer::close_path)
+                .def("line_to", &Gempyre::FrameComposer::line_to)
+                .def("move_to", &Gempyre::FrameComposer::move_to)
+                .def("bezier_curve_to", &Gempyre::FrameComposer::bezier_curve_to)
+                .def("quadratic_curve_to", &Gempyre::FrameComposer::quadratic_curve_to)
+                .def("arc_to", &Gempyre::FrameComposer::arc_to)
                 .def("rect", [](Gempyre::FrameComposer* fc, const RectF& r) {fc->rect(r);})
                 .def("stroke", &Gempyre::FrameComposer::stroke)
                 .def("fill", &Gempyre::FrameComposer::fill)
-                .def("fill_style", &Gempyre::FrameComposer::fillStyle)
-                .def("stroke_style", &Gempyre::FrameComposer::strokeStyle)
-                .def("line_width", &Gempyre::FrameComposer::lineWidth)
+                .def("fill_style", &Gempyre::FrameComposer::fill_style)
+                .def("stroke_style", &Gempyre::FrameComposer::stroke_style)
+                .def("line_width", &Gempyre::FrameComposer::line_width)
                 .def("font", &Gempyre::FrameComposer::font)
-                .def("text_align", &Gempyre::FrameComposer::textAlign)
+                .def("text_align", &Gempyre::FrameComposer::text_align)
                 .def("save", &Gempyre::FrameComposer::save)
                 .def("restore", &Gempyre::FrameComposer::restore)
                 .def("rotate", &Gempyre::FrameComposer::rotate)
                 .def("translate", &Gempyre::FrameComposer::translate)
                 .def("scale", &Gempyre::FrameComposer::scale)
-                .def("draw_image", py::overload_cast<const std::string&, double, double>(&Gempyre::FrameComposer::drawImage))
-                .def("draw_image_rect", [](Gempyre::FrameComposer* fc, const std::string& id, const RectF& r) {fc->drawImage(id, r);})
-                .def("draw_image_clip", [](Gempyre::FrameComposer* fc, const std::string& id, const RectF& c, const RectF& r){fc->drawImage(id, c, r);})
+                .def("text_baseline", &Gempyre::FrameComposer::text_baseline)
+                .def("draw_image", py::overload_cast<const std::string&, double, double>(&Gempyre::FrameComposer::draw_image))
+                .def("draw_image_rect", [](Gempyre::FrameComposer* fc, const std::string& id, const RectF& r) {fc->draw_image(id, r);})
+                .def("draw_image_clip", [](Gempyre::FrameComposer* fc, const std::string& id, const RectF& c, const RectF& r){fc->draw_image(id, c, r);})
                 .def("composed", &Gempyre::FrameComposer::composed)
                 ;
     
@@ -326,25 +327,25 @@ PYBIND11_MODULE(Gempyre, m) {
             .def("open_file_dialog", [](Gempyre::Dialog* self, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::string> {
                 (void) self;
                 py::gil_scoped_acquire acquire;
-                return Gempyre::Dialog::openFileDialog(caption, root, filter);
+                return Gempyre::Dialog::open_file_dialog(caption, root, filter);
             }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=Gempyre::Dialog::Filter())
             
             .def("open_files_dialog", [](Gempyre::Dialog* self, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::vector<std::string>> {
                 (void) self;
                 py::gil_scoped_acquire acquire;
-                return Gempyre::Dialog::openFilesDialog(caption, root, filter);
+                return Gempyre::Dialog::open_files_dialog(caption, root, filter);
             }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=Gempyre::Dialog::Filter())
             
             .def("open_dir_dialog", [](Gempyre::Dialog* self, const std::string& caption, const std::string& root)->std::optional<std::string> {
                 (void) self;
                 py::gil_scoped_acquire acquire;
-                return Gempyre::Dialog::openDirDialog(caption, root);
+                return Gempyre::Dialog::open_dir_dialog(caption, root);
             }, py::arg("caption")="", py::arg("root")="")
             
             .def("save_file_dialog", [](Gempyre::Dialog* self, const std::string& caption, const std::string& root, const std::vector<std::tuple<std::string, std::vector<std::string>>>& filter = {})->std::optional<std::string> {
                 (void) self;
                 py::gil_scoped_acquire acquire;
-                return Gempyre::Dialog::saveFileDialog(caption, root, filter);
+                return Gempyre::Dialog::save_file_dialog(caption, root, filter);
             }, py::arg("caption")="", py::arg("root")="", py::arg("filter")=Gempyre::Dialog::Filter())
             ;
 }

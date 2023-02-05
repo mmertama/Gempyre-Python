@@ -276,7 +276,7 @@ class Game:
         self.on_draw = 0
 
     def game_over(self):
-        self.ui.cancel(self.tick);
+        self.ui.cancel_timer(self.tick);
         self.canvas.draw_completed(None)
         self.tick = None
         Gempyre.Element(self.ui, "game_over").set_attribute("style", "visibility:visible")
@@ -285,7 +285,7 @@ class Game:
         self.draw_loop()
 
     def wave_end(self):
-        self.ui.cancel(self.tick)
+        self.ui.cancel_timer(self.tick)
         self.canvas.draw_completed(None)
         self.tick = None
         Gempyre.Element(self.ui, "wave_end").set_attribute("style", "visibility:visible")
