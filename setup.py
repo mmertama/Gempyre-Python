@@ -40,7 +40,7 @@ class CMakeBuild(build_ext):
 
 
 setup (name='Gempyre',
-       version='0.10.0',
+       version='1.0.0',
        license='MIT',
        description='Gempyre Framework',
        author='Markus Mertama',

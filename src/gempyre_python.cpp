@@ -152,25 +152,25 @@ PYBIND11_MODULE(Gempyre, m) {
         .def("run", &Gempyre::Ui::run, py::call_guard<py::gil_scoped_release>())
         .def("exit", &Gempyre::Ui::exit)
         .def("close", &Gempyre::Ui::close)
-        .def("on_exit", [](Gempyre::Ui* ui, std::function<void ()> onExitFunction = nullptr)->Gempyre::Ui& {
+        .def("on_exit", [](Gempyre::Ui* ui, std::function<void ()> onExitFunction = nullptr)-> auto {
             return ui->on_exit(onExitFunction ? [onExitFunction]() {
                 py::gil_scoped_acquire acquire;
                 return onExitFunction();
             } : static_cast<decltype(onExitFunction)>(nullptr));
         })
-        .def("on_reload", [](Gempyre::Ui* ui, std::function<void ()> onReloadFunction = nullptr)->Gempyre::Ui& {
+        .def("on_reload", [](Gempyre::Ui* ui, std::function<void ()> onReloadFunction = nullptr)-> auto {
         return ui->on_reload(onReloadFunction ? [onReloadFunction]() {
             py::gil_scoped_acquire acquire;
             return onReloadFunction();
         } : static_cast<decltype(onReloadFunction)>(nullptr));
         })
-        .def("on_open", [](Gempyre::Ui* ui, std::function<void ()> onOpenFunction = nullptr)->Gempyre::Ui& {
+        .def("on_open", [](Gempyre::Ui* ui, std::function<void ()> onOpenFunction = nullptr)-> auto {
         return ui->on_open(onOpenFunction ? [onOpenFunction]() {
             py::gil_scoped_acquire acquire;
             return onOpenFunction();
         } : static_cast<decltype(onOpenFunction)>(nullptr));
         })
-        .def("on_error", [](Gempyre::Ui* ui, std::function<void (const std::string& element, const std::string& info)> onErrorFunction = nullptr)->Gempyre::Ui& {
+        .def("on_error", [](Gempyre::Ui* ui, std::function<void (const std::string& element, const std::string& info)> onErrorFunction = nullptr)-> auto {
             return ui->on_error(onErrorFunction ? [onErrorFunction](const std::string& element, const std::string& info) {
                 py::gil_scoped_acquire acquire;
                 return onErrorFunction(element, info);
@@ -233,6 +233,7 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def("add_image", [](Gempyre::CanvasElement* canvas, const std::string& url, const std::function<void (const std::string&)> loaded = nullptr){
                     return canvas->add_image(url, [loaded](const std::string& id) {if(loaded) {py::gil_scoped_acquire acquire; loaded(id);}});})
                 .def("add_images", [](Gempyre::CanvasElement* canvas, const std::vector<std::string> urls, const std::function<void (const std::vector<std::string>&)>& loaded = nullptr) {
+                    PyErr_WarnEx(PyExc_DeprecationWarning, "use add_image", 1);
                     return canvas->add_images(urls, [loaded](const std::vector<std::string>& vec) {if(loaded) {py::gil_scoped_acquire acquire; loaded(vec);}});})
                 .def("paint_image", [](Gempyre::CanvasElement* el, const std::string& imageId, int x, int y, const RectF& clippingRect) {
                     el->paint_image(imageId, x, y, clippingRect);
@@ -240,15 +241,16 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def("paint_image_rect", [](Gempyre::CanvasElement* el, const std::string& imageId, const RectF& targetRect, const RectF& clippingRect) {
                     el->paint_image(imageId, targetRect, clippingRect);
                     }, py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
-                .def("draw_commands", py::overload_cast<const Gempyre::CanvasElement::CommandList&>(&Gempyre::CanvasElement::draw, py::const_))
-                .def("draw_frame", py::overload_cast<const Gempyre::FrameComposer&>(&Gempyre::CanvasElement::draw, py::const_))
+                .def("draw_commands", py::overload_cast<const Gempyre::CanvasElement::CommandList&>(&Gempyre::CanvasElement::draw))
+                .def("draw_frame", py::overload_cast<const Gempyre::FrameComposer&>(&Gempyre::CanvasElement::draw))
                 .def("erase", &Gempyre::CanvasElement::erase, py::arg("resized") = false)
-                .def("draw_completed", [](Gempyre::CanvasElement* canvas, const std::function<void ()>& drawCallback)->void {
+                .def("draw_completed", [](Gempyre::CanvasElement* canvas, std::function<void ()> drawCallback)-> void {
                     canvas->draw_completed(drawCallback ? [drawCallback]() {
                         py::gil_scoped_acquire acquire;
                         drawCallback();
                     } : static_cast<decltype(drawCallback)>(nullptr));
                 })
+                
                 ;
         m.def("color_rgba_clamped", &Gempyre::Color::rgba_clamped, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF);
         m.def("color_rgba", py::overload_cast<uint32_t, uint32_t, uint32_t, uint32_t>(&Gempyre::Color::rgba), py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF);
@@ -257,14 +259,29 @@ PYBIND11_MODULE(Gempyre, m) {
         m.def("color_r", &Gempyre::Color::r);
         m.def("color_g", &Gempyre::Color::g);
         m.def("color_b", &Gempyre::Color::b);
-        m.def("color_alpha", &Gempyre::Color::alpha)
-        ;
+        m.def("color_alpha", &Gempyre::Color::alpha);
+        m.def("Black", [](py::object){return Gempyre::Color::Black;});
+        m.def("White", [](py::object){return Gempyre::Color::White;});
+        m.def("Black", [](py::object){return Gempyre::Color::Black;});
+        m.def("Red", [](py::object){return Gempyre::Color::Red;});
+        m.def("Green", [](py::object){return Gempyre::Color::Green;});
+        m.def("Blue", [](py::object){return Gempyre::Color::Blue;});
+        m.def("Yellow", [](py::object){return Gempyre::Color::Magenta;});
+        m.def("Lime", [](py::object){return Gempyre::Color::Lime;});
+        m.def("Cyan", [](py::object){return Gempyre::Color::Cyan;});
+        m.def("Fuchsia", [](py::object){return Gempyre::Color::Fuchsia;});
+        m.def("Aqua", [](py::object){return Gempyre::Color::Aqua;});
+        m.def("Magenta", [](py::object){return Gempyre::Color::Magenta;});
 
         py::class_<Gempyre::Graphics>(m, "Graphics")
-                .def(py::init<Gempyre::CanvasElement&, int, int>())
-                //There is no makeCanvas... .def(py::init<Gempyre::CanvasElement&>())
+                //.def(py::init<Gempyre::CanvasElement&, int, int>())
+                .def(py::init([](Gempyre::CanvasElement& el, int w, int h) {
+                    PyErr_WarnEx(PyExc_DeprecationWarning, "use Bitmap", 1);
+                    return new Gempyre::Graphics(el, w, h);}))
                 .def(py::init<const Gempyre::Graphics&>())
-                .def("create", &Gempyre::Graphics::create)
+                .def("create", [](Gempyre::Graphics* g, int w, int h) {
+                    PyErr_WarnEx(PyExc_DeprecationWarning, "use Bitmap", 1);
+                    g->create(w, h);})
                 .def("clone", &Gempyre::Graphics::clone)
                 .def_static("pix", &Gempyre::Graphics::pix, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF)
                 .def_property_readonly_static("Black", [](py::object){return Gempyre::Graphics::Black;})
@@ -283,6 +300,23 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def("update", &Gempyre::Graphics::update)
                 ;
 
+          py::class_<Gempyre::Bitmap>(m, "Bitmap")
+                .def(py::init<int, int>())
+                .def(py::init<const Gempyre::Bitmap&>())
+                .def(py::init<const std::vector<uint8_t>&>())
+                .def("create", &Gempyre::Bitmap::create)
+                .def("clone", &Gempyre::Bitmap::clone)
+                .def_static("pix", &Gempyre::Bitmap::pix, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF)
+                .def("set_pixel", &Gempyre::Bitmap::set_pixel)
+                .def("set_alpha", &Gempyre::Bitmap::set_alpha)
+                .def("pixel", &Gempyre::Bitmap::pixel)
+                .def("width", &Gempyre::Bitmap::width)
+                .def("height", &Gempyre::Bitmap::height)
+                .def("draw_rect", [](Gempyre::Bitmap* g, const RectF& r, Gempyre::Color::type c) {g->draw_rect(r, c);})
+                .def("merge", &Gempyre::Bitmap::merge)
+                .def("swap", &Gempyre::Bitmap::swap)
+                ;
+        
         py::class_<Gempyre::FrameComposer>(m, "FrameComposer")
                 .def(py::init<>())
                 .def(py::init<Gempyre::CanvasElement::CommandList&>())
