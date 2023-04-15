@@ -106,7 +106,7 @@ ui.root().subscribe('mousemove', lambda e: move_eyes(float(e.properties['clientX
                      ["clientX", "clientY"], timedelta(milliseconds=100))
 
 kitt_canvas = Gempyre.CanvasElement(ui, "kitt")
-g = Gempyre.Graphics(kitt_canvas, 200, 20)
+g = Gempyre.Bitmap(200, 20)
 position = 1
 direction = 1
 
@@ -119,14 +119,14 @@ def draw_kitt():
         direction = -1
     if position <= 0:
         direction = 1;
-    g.draw_rect(Gempyre.Rect(0, 0, 200, 20), Gempyre.Graphics.Black)
+    g.draw_rect(Gempyre.Rect(0, 0, 200, 20), Gempyre.Black)
     for i in range(0, 20):
-        g.set_pixel(position - 1, i, Gempyre.Graphics.Red)
+        g.set_pixel(position - 1, i, Gempyre.Red)
     for i in range(0, 20):
-        g.set_pixel(position, i, Gempyre.Graphics.pix(0xFF, 0xFF, 0))
+        g.set_pixel(position, i, Gempyre.Bitmap.pix(0xFF, 0xFF, 0))
     for i in range(0, 20):
-        g.set_pixel(position + 1, i, Gempyre.Graphics.Red)
-    g.update()
+        g.set_pixel(position + 1, i, Gempyre.Red)
+    kitt_canvas.draw_bitmap(0, 0, g)
 
 
 ui.start_periodic(timedelta(milliseconds=10), draw_kitt)
