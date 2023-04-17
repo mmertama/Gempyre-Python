@@ -19,7 +19,8 @@ if(MSVC)
     endif()
     find_path(PYTHON_HEADER_PATH "Python.h" HINTS ${Python3_INCLUDE_DIRS})
 elseif(MINGW)
-    find_program(PY_EXE "python3" HINTS "${PYTHON_PATH}" NO_DEFAULT_PATH REQUIRED)
+    #find_package(Python3 3.10 COMPONENTS  REQUIRED)
+    #find_program(PYTHON "python" HINTS "${PYTHON_PATH}" NO_DEFAULT_PATH)    
     set (PYTHON3 python)
     find_package(Python3 HINTS "${PYTHON_PATH}" COMPONENTS Interpreter Development)
     if(NOT Python3)
@@ -32,7 +33,7 @@ elseif(MINGW)
         string(REGEX MATCHALL [0-9]+ VER ${PY_VERSION})
         list(GET VER 0 Python3_VERSION_MAJOR)
         list(GET VER 1 Python3_VERSION_MINOR)
-        get_filename_component(PARENT_DIR ${PYTHON_PATH} DIRECTORY)
+        get_filename_component(PARENT_DIR "${PYTHON_PATH}" DIRECTORY)
         find_path(PYTHON_HEADER_PATH "Python.h" 
             HINTS "${PARENT_DIR}/include/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}" REQUIRED)
         set(PYTHON_INCLUDE_PATH ${PYTHON_HEADER_PATH})
@@ -75,7 +76,7 @@ include_directories (
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG        v2.6.2
+    GIT_TAG        v2.10.4
 )
 
 FetchContent_GetProperties(pybind11)

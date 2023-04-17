@@ -8,6 +8,8 @@
 #include <gempyre_client.h>
 #include <gempyre_utils.h>
 
+#include <iostream>
+
 namespace py = pybind11;
 
 
