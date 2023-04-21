@@ -100,46 +100,51 @@ set(PYBIND11_PYTHON_VERSION ${PY_VER})
 pybind11_add_module(Gempyre
         src/gempyre_python.cpp)
 
+set_target_properties(Gempyre PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)    
+
 add_custom_command(
   TARGET Gempyre
   POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E echo "Building file: $<TARGET_FILE:Gempyre>"
 )
 
-if(MSVC)
-	set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.win-amd64-${PY_VER}")
-elseif(MINGW)
-	set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.mingw_x86_64-${PY_VER}")
-elseif(APPLE)
-    execute_process(
-        COMMAND uname "-m"
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE ARCH)
-    execute_process(
-        COMMAND defaults read loginwindow SystemVersionStampAsString
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE OS_VER_LONG)
-    string(REGEX MATCH "[0-9]+.[0-9]+" OS_VER ${OS_VER_LONG})
-    set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.macosx-${OS_VER}-${ARCH}-${PY_VER}")    
-elseif(UNIX)
-    execute_process(
-        COMMAND uname "-m"
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE ARCH)
-    set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.linux-${ARCH}-${PY_VER}")    
-else()
-    message(FATAL_ERROR "The environment is not recognized, that may lead ot issues!")
-endif()
+#if(MSVC)
+#	set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.win-amd64-${PY_VER}")
+#elseif(MINGW)
+#	set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.mingw_x86_64-${PY_VER}")
+#elseif(APPLE)
+#    execute_process(
+#        COMMAND uname "-m"
+#        OUTPUT_STRIP_TRAILING_WHITESPACE
+#        OUTPUT_VARIABLE ARCH)
+#    execute_process(
+#        COMMAND defaults read loginwindow SystemVersionStampAsString
+#        OUTPUT_STRIP_TRAILING_WHITESPACE
+#        OUTPUT_VARIABLE OS_VER_LONG)
+#    string(REGEX MATCH "[0-9]+.[0-9]+" OS_VER ${OS_VER_LONG})
+#    set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.macosx-${OS_VER}-${ARCH}-${PY_VER}")    
+#elseif(UNIX)
+#    execute_process(
+#        COMMAND uname "-m"
+#        OUTPUT_STRIP_TRAILING_WHITESPACE
+#        OUTPUT_VARIABLE ARCH)
+#    set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.linux-${ARCH}-${PY_VER}")    
+#else()
+#    message(FATAL_ERROR "The environment is not recognized, that may lead ot issues!")
+#endif()
 
-message("Pyd file will be copied to ${LIB_TARGET}" )
+#message("Pyd file will be copied to ${LIB_TARGET}" )
 
 
-file(MAKE_DIRECTORY ${LIB_TARGET})
+#file(MAKE_DIRECTORY ${LIB_TARGET})
 
 add_custom_command(
   TARGET Gempyre
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Gempyre> ${LIB_TARGET}/
+#  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Gempyre> ${LIB_TARGET}/
   COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
 )
 

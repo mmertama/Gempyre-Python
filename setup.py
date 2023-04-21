@@ -1,3 +1,4 @@
+
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 import os
@@ -17,6 +18,10 @@ class CMakeBuild(build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
         super().run()
+
+    def finalize_options(self):
+        super().finalize_options()
+        self.build_lib = os.path.dirname(os.path.abspath(__file__)) + '/build'
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
