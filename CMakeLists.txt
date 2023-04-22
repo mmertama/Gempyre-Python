@@ -41,9 +41,13 @@ elseif(MINGW)
 else() 
     find_program(PYTHON "python3" HINTS "${PYTHON_PATH}" REQUIRED)
     set (PYTHON3 python3)
-    find_package(Python3 HINTS "${PYTHON_PATH}" COMPONENTS Interpreter Development)
+    find_package(Python3 PATHS "${PYTHON_PATH}" COMPONENTS Interpreter Development)
     if(NOT Python3)
-        find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+        execute_process(COMMAND ${PYTHON3}  -c "import sys; print(sys.executable)" OUTPUT_VARIABLE PY_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        find_package(Python3 PATHS ${PY_DIR} COMPONENTS Interpreter Development)
+        if(NOT Python3)
+             find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+        endif()
     endif() 
     find_path(PYTHON_HEADER_PATH "Python.h" HINTS ${Python3_INCLUDE_DIRS})
 endif()
@@ -91,11 +95,13 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/README.md
 
 
 if(NOT DEFINED Python3_VERSION_MAJOR)
-	message(FATAL_ERROR "Cannot define Python version")
+    execute_process(COMMAND ${PYTHON3} --version OUTPUT_VARIABLE PY_VER OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+    set(PY_VER "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}")
 endif()
 
-set(PY_VER "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}")
 
+add_definitions(-DPYBIND11_PYTHON_VERSION="${PY_VER}")
 set(PYBIND11_PYTHON_VERSION ${PY_VER})
 pybind11_add_module(Gempyre
         src/gempyre_python.cpp)
@@ -111,43 +117,12 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E echo "Building file: $<TARGET_FILE:Gempyre>"
 )
 
-#if(MSVC)
-#	set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.win-amd64-${PY_VER}")
-#elseif(MINGW)
-#	set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.mingw_x86_64-${PY_VER}")
-#elseif(APPLE)
-#    execute_process(
-#        COMMAND uname "-m"
-#        OUTPUT_STRIP_TRAILING_WHITESPACE
-#        OUTPUT_VARIABLE ARCH)
-#    execute_process(
-#        COMMAND defaults read loginwindow SystemVersionStampAsString
-#        OUTPUT_STRIP_TRAILING_WHITESPACE
-#        OUTPUT_VARIABLE OS_VER_LONG)
-#    string(REGEX MATCH "[0-9]+.[0-9]+" OS_VER ${OS_VER_LONG})
-#    set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.macosx-${OS_VER}-${ARCH}-${PY_VER}")    
-#elseif(UNIX)
-#    execute_process(
-#        COMMAND uname "-m"
-#        OUTPUT_STRIP_TRAILING_WHITESPACE
-#        OUTPUT_VARIABLE ARCH)
-#    set(LIB_TARGET "${CMAKE_SOURCE_DIR}/build/lib.linux-${ARCH}-${PY_VER}")    
-#else()
-#    message(FATAL_ERROR "The environment is not recognized, that may lead ot issues!")
-#endif()
-
-#message("Pyd file will be copied to ${LIB_TARGET}" )
-
-
-#file(MAKE_DIRECTORY ${LIB_TARGET})
 
 add_custom_command(
   TARGET Gempyre
   POST_BUILD
-#  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Gempyre> ${LIB_TARGET}/
   COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
 )
 
 target_link_libraries (Gempyre PRIVATE gempyre::gempyre)
-
 
