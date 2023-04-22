@@ -7,7 +7,6 @@ from datetime import date
 from datetime import timedelta
 from Gempyre_utils import resource
 
-Gempyre.set_debug()
 name = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(sys.argv[0]), "python_test_1.html")
 
 map, names = resource.from_file(name)

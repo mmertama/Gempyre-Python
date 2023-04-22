@@ -11,6 +11,8 @@ from Gempyre_utils import resource
 name = os.path.join(os.path.dirname(sys.argv[0]), "python_test_2.html")
 map, names = resource.from_file(name)
 
+Gempyre.set_debug()
+
 ui = Gempyre.Ui(map, names[name])
 
 header = Gempyre.Element(ui, "header");

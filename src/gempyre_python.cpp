@@ -130,13 +130,15 @@ PYBIND11_MODULE(Gempyre, m) {
                 return r ? std::make_optional<RectF>(::rectF(*r)) :  std::nullopt;
                 });
     py::class_<Gempyre::Ui>(m, "Ui")
-        .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, int, int, int,
+        .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, int, int, 
+         std::unordered_map<std::string, std::string>, int,
          unsigned int, const std::string& >(),
              py::arg("filemap"),
              py::arg("index_html"),
              py::arg("title") = "",
-             py::arg("width") = -1,
-             py::arg("height") = -1,
+             py::arg("width") = 620,
+             py::arg("height") = 640,
+             py::arg("ui_params") = std::unordered_map<std::string, std::string>{},
              py::arg("flags") = 0,
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot

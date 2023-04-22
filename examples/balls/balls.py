@@ -383,14 +383,14 @@ def main():
     for i in range(1, len(full_paths)):
         urls.append(names[full_paths[i]])
 
-    ui = Gempyre.Ui(data_map, names[full_paths[0]])
+    ui = Gempyre.Ui(data_map, names[full_paths[0]], "Balls", 720, 920)
 
     Gempyre.Element(ui, "game_over").set_attribute("style", "visibility:hidden")
     Gempyre.Element(ui, "wave_end").set_attribute("style", "visibility:hidden")
 
     canvas = Gempyre.CanvasElement(ui, 'canvas')
 
-    images = canvas.add_images(urls, None)
+    images = [canvas.add_image(url, None) for url in urls]
     game = Game(ui, canvas, zip(files[1:], images))
 
     ui.on_open(lambda: game.init())
