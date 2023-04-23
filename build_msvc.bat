@@ -19,6 +19,7 @@ goto exit
 
 cmake .. -DCMAKE_BUILD_TYPE=Release
 if %ERRORLEVEL% NEQ 0 popd && exit /b %ERRORLEVEL%
+copy Release\*.pyd ..\build\
 cmake --build . --config Release
 pip3 install -e .. --user
 
