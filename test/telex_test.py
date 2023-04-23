@@ -12,7 +12,7 @@ name = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(sys.ar
 map, names = resource.from_file(name)
 print(names[name], name)
 
-ui = Gempyre.Ui(map, names[name]) if sys.platform != 'win32' or sys.version_info < (
+ui = Gempyre.Ui(map, names[name], "Test app") if sys.platform != 'win32' or sys.version_info < (
     3, 8) else Gempyre.Ui(map, names[name], "")
 
 ver, major, minor = Gempyre.version()
@@ -125,11 +125,13 @@ def draw_kitt():
         g.set_pixel(position, i, Gempyre.Bitmap.pix(0xFF, 0xFF, 0))
     for i in range(0, 20):
         g.set_pixel(position + 1, i, Gempyre.Red)
-    kitt_canvas.draw_bitmap(0, 0, g)
 
-
+# set redraw
+kitt_canvas.draw_completed(lambda: kitt_canvas.draw_bitmap(0, 0, g))
+# set graphics motion update, i.e. fps and anitmation are now decoupled (which is important)
 ui.start_periodic(timedelta(milliseconds=10), draw_kitt)
-
+# draw 1st time, draw_completed does redraw
+kitt_canvas.draw_bitmap(0, 0, g)
 
 ui.run()
 
