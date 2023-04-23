@@ -4,13 +4,21 @@ cmake_minimum_required(VERSION 3.14)
 # locations on all platforms.
 project(gempyrepy LANGUAGES CXX C)
 
-
 if(UNIX AND NOT APPLE AND NOT RASPBERRY)
     set(LINUX ON)
 endif()    
 
+if(ADD_PATH)
+    # for GH actions
+    string(REPLACE "+" ";" LIB_PATH ${ADD_PATH})
+    message("Append to CMAKE_MODULE_PATH: '${LIB_PATH}'")
+    link_directories(${LIB_PATH})
+endif()
 
 if(MSVC)
+    # for GH actions
+    list(APPEND CMAKE_LIBRARY_PATH ${LIB_PATH})
+   
     find_program(PYTHON "python" HINTS "${PYTHON_PATH}" REQUIRED)
     set (PYTHON3 python)
     find_package(Python3 HINTS "${PYTHON_PATH}" COMPONENTS Interpreter Development)
