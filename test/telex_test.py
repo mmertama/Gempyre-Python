@@ -127,11 +127,11 @@ def draw_kitt():
         g.set_pixel(position + 1, i, Gempyre.Red)
 
 # set redraw
-kitt_canvas.draw_completed(lambda: kitt_canvas.draw_bitmap(0, 0, g))
+kitt_canvas.draw_completed(lambda: kitt_canvas.draw_bitmap(g))
 # set graphics motion update, i.e. fps and anitmation are now decoupled (which is important)
 ui.start_periodic(timedelta(milliseconds=10), draw_kitt)
 # draw 1st time, draw_completed does redraw
-kitt_canvas.draw_bitmap(0, 0, g)
+kitt_canvas.draw_bitmap(g)
 
 ui.run()
 

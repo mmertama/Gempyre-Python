@@ -131,15 +131,15 @@ PYBIND11_MODULE(Gempyre, m) {
                 });
     py::class_<Gempyre::Ui>(m, "Ui")
         .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, int, int, 
-         std::unordered_map<std::string, std::string>, int,
+         int, std::unordered_map<std::string, std::string>,
          unsigned int, const std::string& >(),
              py::arg("filemap"),
              py::arg("index_html"),
              py::arg("title") = "",
              py::arg("width") = 620,
              py::arg("height") = 640,
-             py::arg("ui_params") = std::unordered_map<std::string, std::string>{},
              py::arg("flags") = 0,
+             py::arg("ui_params") = std::unordered_map<std::string, std::string>{},
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
              )
@@ -245,7 +245,8 @@ PYBIND11_MODULE(Gempyre, m) {
                     }, py::arg("imageId"), py::arg("targetRect"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
                 .def("draw_commands", py::overload_cast<const Gempyre::CanvasElement::CommandList&>(&Gempyre::CanvasElement::draw))
                 .def("draw_frame", py::overload_cast<const Gempyre::FrameComposer&>(&Gempyre::CanvasElement::draw))
-                .def("draw_bitmap", py::overload_cast<int, int, const Gempyre::Bitmap&>(&Gempyre::CanvasElement::draw))
+                .def("draw_bitmap", py::overload_cast<const Gempyre::Bitmap&>(&Gempyre::CanvasElement::draw))
+                .def("draw_bitmap_at", py::overload_cast<int, int, const Gempyre::Bitmap&>(&Gempyre::CanvasElement::draw))
                 .def("erase", &Gempyre::CanvasElement::erase, py::arg("resized") = false)
                 .def("draw_completed", [](Gempyre::CanvasElement* canvas, std::function<void ()> drawCallback)-> void {
                     canvas->draw_completed(drawCallback ? [drawCallback]() {
@@ -289,7 +290,8 @@ PYBIND11_MODULE(Gempyre, m) {
                 .def("width", &Gempyre::Bitmap::width)
                 .def("height", &Gempyre::Bitmap::height)
                 .def("draw_rect", [](Gempyre::Bitmap* g, const RectF& r, Gempyre::Color::type c) {g->draw_rect(r, c);})
-                .def("merge", &Gempyre::Bitmap::merge)
+                .def("merge_at", py::overload_cast<int, int, const Gempyre::Bitmap&>(&Gempyre::Bitmap::merge))
+                .def("merge", py::overload_cast<const Gempyre::Bitmap&>(&Gempyre::Bitmap::merge))
                 .def("swap", &Gempyre::Bitmap::swap)
                 ;
         
