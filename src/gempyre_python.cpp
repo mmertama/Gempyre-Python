@@ -114,7 +114,8 @@ PYBIND11_MODULE(Gempyre, m) {
                  }, properties, throttle);
                 }, py::arg("name"), py::arg("handler"), py::arg("properties") = std::vector<std::string>{}, py::arg("throttle") = 0ms)
             .def("set_html", &Gempyre::Element::set_html)
-            .def("set_attribute", &Gempyre::Element::set_attribute, py::arg("attr"), py::arg("value") = "")
+            .def("set_attribute",  py::overload_cast<const std::string&, const std::string&>(&Gempyre::Element::set_attribute))
+            .def("set_boolean_attribute",  py::overload_cast<const std::string&>(&Gempyre::Element::set_attribute))
             .def("remove_attribute", &Gempyre::Element::remove_attribute)
             .def("set_style", &Gempyre::Element::set_style)
             //.def("remove_style", &Gempyre::Element::removeStyle)

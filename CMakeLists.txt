@@ -85,6 +85,7 @@ include_directories (
     include
 )
 
+# TODO remove this and just mark pybind11 as a dependency
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
