@@ -2,6 +2,7 @@ import sys
 import base64
 import re
 import os
+from typing import Dict
 
 def from_file_list(lst):
     """
@@ -11,14 +12,14 @@ def from_file_list(lst):
     """
     data = dict()
     names = dict()
-    for inName in lst:
+    for in_name in lst:
         encoded = ""
-        with open(inName, 'rb') as infile:
+        with open(in_name, 'rb') as infile:
             content = infile.read()
             encoded = base64.standard_b64encode(content).decode('utf-8')
-        sname = '/' + re.sub('[^a-zA-Z_.]', '', os.path.basename(inName)) # why this was capitalize()?
+        sname = '/' + re.sub('[^a-zA-Z_.]', '', os.path.basename(in_name)) # why this was capitalize()?
         data[sname] = encoded
-        names[inName] = sname
+        names[in_name] = sname
     return data, names
     
     
@@ -33,3 +34,17 @@ def from_file(*argv):
         lst.append(a);
     return from_file_list(lst)
 
+def from_bytes(data_map: Dict[str, bytes]):
+    """
+    Generates a filemap for Gempyre
+    :param dict of file (kind of) names and their content.
+    :return: two dictionaries, first is map second is to map it's keys to give arguments.
+    """
+    data = dict()
+    names = dict()
+    for in_name, content in data_map.items():
+        encoded = base64.standard_b64encode(content).decode('utf-8')
+        sname = '/' + re.sub('[^a-zA-Z_.]', '', os.path.basename(in_name)) # why this was capitalize()?
+        data[sname] = encoded
+        names[in_name] = sname
+    return data, names

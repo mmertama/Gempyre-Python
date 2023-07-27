@@ -123,7 +123,43 @@ Please note that Gempyre Core and Gempyre Graphics are part of Python API, but n
   
 ## Examples
 
-### Minimum application
+### Minimum single file app
+
+```py
+
+#!/usr/bin/python3
+import Gempyre
+import os
+import sys
+from Gempyre_utils import resource
+
+html = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+</head>
+<body>
+  <script src="/gempyre.js"></script>
+  Hello!
+</body>
+</html>  
+'''
+
+
+if __name__ == "__main__":
+    map, names = resource.from_bytes({"ui.html": bytes(html, 'utf-8')})
+    ui = Gempyre.Ui(map, names["ui.html"])
+    ui.run()
+    
+
+```
+
+
+### Minimum application with an external UI file
 
   ```py
   import Gempyre
