@@ -77,8 +77,22 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-fPIC)
 
 
+
 # gempyre has to be installed
-find_package(gempyre REQUIRED)
+find_package(gempyre)
+    if(gempyre_NOTFOUND)
+        FetchContent_Declare(
+        gempyre
+        GIT_REPOSITORY https://github.com/mertama/Gempyre
+    )
+
+    FetchContent_GetProperties(gempyre)
+
+    if(NOT gempyre_POPULATED)
+        FetchContent_Populate(gempyre)
+        add_subdirectory(${gempyre_SOURCE_DIR} ${gempyre_BINARY_DIR})
+    endif()
+endif()    
 
 include_directories (
     /usr/local/include
@@ -133,5 +147,8 @@ add_custom_command(
   COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
 )
 
-target_link_libraries (Gempyre PRIVATE gempyre::gempyre)
-
+if( DEFINED gempyre_BINARY_DIR )
+    target_link_libraries (Gempyre PRIVATE gempyre)
+else()    
+    target_link_libraries (Gempyre PRIVATE gempyre::gempyre)
+endif()
