@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "scikit-build", "cmake>=3.18"]
+build-backend = "setuptools.build_meta"
+
+#requires = ["scikit-build-core"]
+#build-backend = "scikit_build_core.build"
+
+[project]
+name = "Gempyre"
+version = "1.2.26"
+description = "Gempyre is a framework for quick and simple UI development"
+#repository = "https://github.com/mmertama/Gempyre-Python"
+#homepage = "https://github.com/mmertama"
+readme = "README.md"
+#license="MIT"
+
+[tool.scikit-build]
+cmake.minimum-version = "3.18"
+cmake.args = []
+cmake.build-type = "Release"
+cmake.targets = []
+wheel.py-api = "cp310"
+wheel.license-files = ["LICEN[CS]E*", "COPYING*", "NOTICE*", "AUTHORS*"]
+install.components = []
+
+
+#[tool.poetry.dependencies]
+# Compatible Python versions
+#python = ">=3.8"
+#pywebview = ">=4.2.1"
+#websockets = ">=11.0.3"
+#gempyre_lib = { git = "https://github.com/mmertama/Gempyre.git" }
+#
+#keywords = ["gui", "ui"]
+#
+#packages = [
+#    { include = "Gempyre_utils/**/*.py" },
+#]
+

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 
-# Must use GNUInstallDirs to install libraries into correct
-# locations on all platforms.
 project(gempyrepy LANGUAGES CXX C)
+
+find_package(PythonExtensions REQUIRED)
 
 if(UNIX AND NOT APPLE AND NOT RASPBERRY)
     set(LINUX ON)
@@ -77,8 +77,22 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-fPIC)
 
 
+
 # gempyre has to be installed
-find_package(gempyre REQUIRED)
+find_package(gempyre)
+    if(gempyre_NOTFOUND)
+        FetchContent_Declare(
+        gempyre
+        GIT_REPOSITORY https://github.com/mertama/Gempyre
+    )
+
+    FetchContent_GetProperties(gempyre)
+
+    if(NOT gempyre_POPULATED)
+        FetchContent_Populate(gempyre)
+        add_subdirectory(${gempyre_SOURCE_DIR} ${gempyre_BINARY_DIR})
+    endif()
+endif()    
 
 include_directories (
     /usr/local/include
@@ -133,5 +147,28 @@ add_custom_command(
   COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
 )
 
-target_link_libraries (Gempyre PRIVATE gempyre::gempyre)
+if( DEFINED gempyre_BINARY_DIR )
+    target_link_libraries (Gempyre PRIVATE gempyre)
+else()    
+    target_link_libraries (Gempyre PRIVATE gempyre::gempyre)
+endif()
 
+
+# scikit - build wants to install...
+#python_extension_module(Gempyre)
+
+
+string(REPLACE "/" ";" NDIR ${CMAKE_BINARY_DIR})
+list(POP_BACK NDIR)
+list(APPEND NDIR "cmake-install")
+list(JOIN NDIR "/" NDIR)
+#set(NDIR "${NDIR}/cmake-install")
+
+message("Target: ${CMAKE_BINARY_DIR} ${NDIR}")
+
+install (TARGETS Gempyre
+         LIBRARY DESTINATION ${NDIR})
+#install(DIRECTORY Gempyre DESTINATION ${SKTARGET}) 
+#install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre_utils DESTINATION ${SKTARGET})         
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre DESTINATION ${CMAKE_BINARY_DIR}) 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre_utils DESTINATION ${CMAKE_BINARY_DIR})         
