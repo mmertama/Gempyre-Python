@@ -1,5 +1,5 @@
 import Gempyre
-from Gempyre_utils import resource
+from Gempyre import resource
 import random
 import math
 from datetime import timedelta  # for time periods

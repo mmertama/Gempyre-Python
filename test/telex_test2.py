@@ -6,7 +6,7 @@ import shlex
 import psutil
 
 import Gempyre
-from Gempyre_utils import resource
+from Gempyre import resource
 
 name = os.path.join(os.path.dirname(sys.argv[0]), "python_test_2.html")
 map, names = resource.from_file(name)

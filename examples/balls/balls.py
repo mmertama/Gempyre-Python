@@ -4,7 +4,7 @@ import math
 import random
 from datetime import timedelta
 import Gempyre
-from Gempyre_utils import resource
+from Gempyre import resource
 
 TICK_SPEED = 30
 MONSTER_SPEED = 0.15

@@ -131,7 +131,7 @@ Please note that Gempyre Core and Gempyre Graphics are part of Python API, but n
 import Gempyre
 import os
 import sys
-from Gempyre_utils import resource
+from Gempyre import resource
 
 html = '''
 <!DOCTYPE html>
@@ -165,7 +165,7 @@ if __name__ == "__main__":
   import Gempyre
   import os
   import sys
-  from Gempyre_utils import resource
+  from Gempyre import resource
 
   name = os.path.join(os.path.dirname(sys.argv[0]), "hello.html")
   map, names = resource.from_file(name)
