@@ -84,18 +84,20 @@ add_compile_options(-fPIC)
 
 
 # gempyre has to be installed
-find_package(gempyre)
-    if(gempyre_NOTFOUND)
-        FetchContent_Declare(
-        gempyre
-        GIT_REPOSITORY https://github.com/mertama/Gempyre
+find_package(gempyre QUIET)
+    if(NOT gempyre_FOUND)
+        set (HAS_AFFILIATES OFF CACHE INTERNAL "Turn off") 
+        set (HAS_TEST OFF CACHE INTERNAL "Turn off") 
+        set (NO_EXPORT TRUE CACHE INTERNAL "Turn off")
+        FetchContent_Declare(gempyre
+        GIT_REPOSITORY https://github.com/mmertama/Gempyre.git
     )
 
     FetchContent_GetProperties(gempyre)
 
     if(NOT gempyre_POPULATED)
         FetchContent_Populate(gempyre)
-        add_subdirectory(${gempyre_SOURCE_DIR} ${gempyre_BINARY_DIR})
+        add_subdirectory(${gempyre_SOURCE_DIR} ${gempyre_BINARY_DIR} EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents install
     endif()
 endif()    
 
@@ -105,8 +107,7 @@ include_directories (
 )
 
 # TODO remove this and just mark pybind11 as a dependency
-FetchContent_Declare(
-    pybind11
+FetchContent_Declare( pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
     GIT_TAG        v2.10.4
 )
