@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.14)
 
 project(gempyrepy LANGUAGES CXX C)
 
-find_package(PythonExtensions REQUIRED)
+if(SKBUILD)
+    find_package(PythonExtensions REQUIRED)
+endif()
 
 if(UNIX AND NOT APPLE AND NOT RASPBERRY)
     set(LINUX ON)
@@ -62,7 +64,10 @@ endif()
 
 include_directories(${PYTHON_INCLUDE_PATH})
 
+
 include(GNUInstallDirs)
+
+
 include(ExternalProject)
 include(FetchContent)
 
@@ -123,52 +128,62 @@ else()
     set(PY_VER "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}")
 endif()
 
+if(SKBUILD)
+    set(LIB_NAME _gempyre)
+else()
+    set(LIB_NAME Gempyre)
+endif()  
+
+add_compile_definitions(GEMPYRE_NAME=${LIBNAME})
 
 add_definitions(-DPYBIND11_PYTHON_VERSION="${PY_VER}")
 set(PYBIND11_PYTHON_VERSION ${PY_VER})
-pybind11_add_module(Gempyre
-        src/gempyre_python.cpp)
+pybind11_add_module(${LIB_NAME}
+        Gempyre/gempyre_python.cpp)
 
-set_target_properties(Gempyre PROPERTIES
+set_target_properties(${LIB_NAME} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )    
 
 add_custom_command(
-  TARGET Gempyre
+  TARGET ${LIB_NAME}
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E echo "Building file: $<TARGET_FILE:Gempyre>"
+  COMMAND ${CMAKE_COMMAND} -E echo "Building file: $<TARGET_FILE:${LIB_NAME}>"
 )
 
-
+if(NOT SKBUILD)
 add_custom_command(
-  TARGET Gempyre
+  TARGET ${LIB_NAME}
   POST_BUILD
   COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
 )
+endif()
 
 if( DEFINED gempyre_BINARY_DIR )
-    target_link_libraries (Gempyre PRIVATE gempyre)
+    target_link_libraries (${LIB_NAME} PRIVATE gempyre)
 else()    
-    target_link_libraries (Gempyre PRIVATE gempyre::gempyre)
+    target_link_libraries (${LIB_NAME} PRIVATE gempyre::gempyre)
 endif()
 
 
 # scikit - build wants to install...
 #python_extension_module(Gempyre)
+if(SKBUILD)
+    string(REPLACE "/" ";" NDIR ${CMAKE_BINARY_DIR})
+    list(POP_BACK NDIR)
+    list(APPEND NDIR "cmake-install")
+    list(JOIN NDIR "/" NDIR)
+    set(NDIR "${NDIR}/cmake-install")
 
+    #message("Target: ${CMAKE_BINARY_DIR} ${NDIR}")
 
-string(REPLACE "/" ";" NDIR ${CMAKE_BINARY_DIR})
-list(POP_BACK NDIR)
-list(APPEND NDIR "cmake-install")
-list(JOIN NDIR "/" NDIR)
-#set(NDIR "${NDIR}/cmake-install")
+    install (TARGETS ${LIB_NAME}
+            LIBRARY DESTINATION Gempyre)
 
-message("Target: ${CMAKE_BINARY_DIR} ${NDIR}")
+            #install(DIRECTORY Gempyre DESTINATION ${SKTARGET}) 
+    #install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre_utils DESTINATION ${SKTARGET})         
 
-install (TARGETS Gempyre
-         LIBRARY DESTINATION ${NDIR})
-#install(DIRECTORY Gempyre DESTINATION ${SKTARGET}) 
-#install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre_utils DESTINATION ${SKTARGET})         
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre DESTINATION ${CMAKE_BINARY_DIR}) 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre_utils DESTINATION ${CMAKE_BINARY_DIR})         
+    #file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre DESTINATION ${CMAKE_BINARY_DIR}) 
+    #file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre_utils DESTINATION ${CMAKE_BINARY_DIR})         
+endif()

@@ -81,7 +81,7 @@ static std::string findBrowser() {
 }
 */
 
-PYBIND11_MODULE(Gempyre, m) {
+PYBIND11_MODULE(_gempyre, m) {
     m.def("set_debug", &Gempyre::set_debug, py::arg("is_debug") = true);
     m.def("version", &Gempyre::version);
     m.def("html_file_launch_cmd", &GempyreUtils::html_file_launch_cmd); //is this the only function fom GempyreUtils? Therefore attached here

@@ -1,4 +1,4 @@
-
+from setuptools import find_packages
 from skbuild import setup  # This line replaces 'from setuptools import setup'
 import os
 
@@ -12,9 +12,9 @@ setup (name='Gempyre',
        long_description='''
 Gempyre is C++ Framework for quick and simple UI development and Gempyre-Python apply that breeze to Python development.
 ''',
-       packages=["Gempyre", "Gempyre_utils"],
-       #package_dir={"": os.path.abspath(__file__)},
-       cmake_install_dir="Gempyre",
+       packages=find_packages(),
+       #package_dir={"": "_skbuild/linux-x86_64-3.8/cmake-install"},
+       #cmake_install_dir="Gempyre",
        #python_requires=">=3.8",	
        #packages=find_packages(),
        #ext_modules=[CMakeExtension('Gempyre')],
