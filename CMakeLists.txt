@@ -109,7 +109,7 @@ include_directories (
 # TODO remove this and just mark pybind11 as a dependency
 FetchContent_Declare( pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG        v2.10.4
+    GIT_TAG        v2.11.1
 )
 
 FetchContent_GetProperties(pybind11)
@@ -140,7 +140,7 @@ add_compile_definitions(GEMPYRE_NAME=${LIBNAME})
 add_definitions(-DPYBIND11_PYTHON_VERSION="${PY_VER}")
 set(PYBIND11_PYTHON_VERSION ${PY_VER})
 pybind11_add_module(${LIB_NAME}
-        Gempyre/gempyre_python.cpp)
+        src/Gempyre/gempyre_python.cpp)
 
 set_target_properties(${LIB_NAME} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -162,6 +162,22 @@ add_custom_command(
 endif()
 
 if( DEFINED gempyre_BINARY_DIR )
+
+if(SKBUILD)
+    if(WIN32)
+      # Otherwise this is injected withing find_package
+      # Look path as lib may not exits at this phase
+        file(GLOB_RECURSE UVA_D LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/*gempyrelib)
+        list(FILTER UVA_D INCLUDE REGEX gempyre-build)
+        if(NOT UVA_D)
+            message(FATAL_ERROR "Cannot find gempyrelib from ${CMAKE_SOURCE_DIR}/_skbuild")
+        endif()
+        list(GET UVA_D 0 UVA_F)
+        set(UVA_LIB  "${UVA_F}/gempyrelib/libuv-prefix/src/libuv-build/Release/uv_a.lib")
+        add_dependencies(${LIB_NAME} gempyre ${UVA_LIB})
+        endif()
+    endif()
+
     target_link_libraries (${LIB_NAME} PRIVATE gempyre)
 else()    
     target_link_libraries (${LIB_NAME} PRIVATE gempyre::gempyre)
@@ -171,18 +187,18 @@ endif()
 # scikit - build wants to install...
 #python_extension_module(Gempyre)
 if(SKBUILD)
-    string(REPLACE "/" ";" NDIR ${CMAKE_BINARY_DIR})
-    list(POP_BACK NDIR)
-    list(APPEND NDIR "cmake-install")
-    list(JOIN NDIR "/" NDIR)
-    set(NDIR "${NDIR}/cmake-install")
+    #string(REPLACE "/" ";" NDIR ${CMAKE_BINARY_DIR})
+    #list(POP_BACK NDIR)
+    #list(APPEND NDIR "cmake-install")
+    #list(JOIN NDIR "/" NDIR)
+    #set(NDIR "${NDIR}/cmake-install")
 
     #message("Target: ${CMAKE_BINARY_DIR} ${NDIR}")
 
-    install (TARGETS ${LIB_NAME}
-            LIBRARY DESTINATION Gempyre)
+    install (TARGETS ${LIB_NAME} DESTINATION .)
+    #        LIBRARY DESTINATION src/Gempyre)
 
-            #install(DIRECTORY Gempyre DESTINATION ${SKTARGET}) 
+    #install(DIRECTORY Gempyre DESTINATION ${SKTARGET}) 
     #install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre_utils DESTINATION ${SKTARGET})         
 
     #file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Gempyre DESTINATION ${CMAKE_BINARY_DIR}) 

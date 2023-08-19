@@ -2,7 +2,7 @@ import Gempyre
 import os
 import sys
 from pathlib import Path
-from Gempyre_utils import resource
+from Gempyre import resource
 
 def main():
     name = os.path.join(os.path.dirname(sys.argv[0]), "python_dialog_test.html")

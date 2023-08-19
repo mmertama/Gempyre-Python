@@ -8,12 +8,30 @@ import psutil
 import Gempyre
 from Gempyre import resource
 
-name = os.path.join(os.path.dirname(sys.argv[0]), "python_test_2.html")
-map, names = resource.from_file(name)
+html = '''<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>test</title>
+</head>
+<body>
+  <script src="/gempyre.js"></script>
+  <table id="info">
+  <tr id="header">
+  </tr>
+  </table>
+  <input id="command_line" type="text"></input>
+  <button id="run">Run</button>
+  <pre id="output"></pre>
+</body>
+</html>
+'''
+
+map, names = resource.from_bytes({"main.html": bytes(html, 'utf-8')})
 
 Gempyre.set_debug()
 
-ui = Gempyre.Ui(map, names[name])
+ui = Gempyre.Ui(map, names["main.html"])
 
 header = Gempyre.Element(ui, "header");
 Gempyre.Element(ui, "th", header).set_html("Name")

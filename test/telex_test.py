@@ -5,7 +5,7 @@ import Gempyre
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
-from Gempyre_utils import resource
+from Gempyre import resource
 
 name = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(sys.argv[0]), "python_test_1.html")
 

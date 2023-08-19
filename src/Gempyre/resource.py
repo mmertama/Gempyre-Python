@@ -48,3 +48,6 @@ def from_bytes(data_map: Dict[str, bytes]):
         data[sname] = encoded
         names[in_name] = sname
     return data, names
+
+def from_html(html: str):
+    return from_bytes({"main.html": bytes(html, 'utf-8')})

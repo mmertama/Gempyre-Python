@@ -1,18 +1,18 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "scikit-build", "cmake>=3.18", "ninja"]
+requires = ["setuptools>=42", "wheel", "scikit-build", "cmake>=3.18", "ninja; platform_system!='Windows'"]
 build-backend = "setuptools.build_meta"
 
 #requires = ["scikit-build-core"]
 #build-backend = "scikit_build_core.build"
 
-[project]
-name = "Gempyre"
-version = "1.2.26"
-description = "Gempyre is a framework for quick and simple UI development"
-#repository = "https://github.com/mmertama/Gempyre-Python"
-#homepage = "https://github.com/mmertama"
-readme = "README.md"
-#license="MIT"
+#[project]
+#name = "Gempyre"
+#version = "1.2.26"
+#description = "Gempyre is a framework for quick and simple UI development"
+##repository = "https://github.com/mmertama/Gempyre-Python"
+##homepage = "https://github.com/mmertama"
+#readme = "README.md"
+##license="MIT"
 
 [tool.scikit-build]
 cmake.minimum-version = "3.18"
