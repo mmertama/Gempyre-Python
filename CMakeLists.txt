@@ -97,7 +97,7 @@ find_package(gempyre QUIET)
 
     if(NOT gempyre_POPULATED)
         FetchContent_Populate(gempyre)
-        add_subdirectory(${gempyre_SOURCE_DIR} ${gempyre_BINARY_DIR} EXCLUDE_FROM_ALL) # EXCLUDE_FROM_ALL prevents install
+        add_subdirectory(${gempyre_SOURCE_DIR} ${gempyre_BINARY_DIR}) 
     endif()
 endif()    
 
@@ -173,11 +173,11 @@ if(SKBUILD)
             message(FATAL_ERROR "Cannot find gempyrelib from ${CMAKE_SOURCE_DIR}/_skbuild")
         endif()
         list(GET UVA_D 0 UVA_F)
-        set(UVA_LIB  "${UVA_F}/gempyrelib/libuv-prefix/src/libuv-build/Release/uv_a.lib")
-        add_dependencies(${LIB_NAME} gempyre ${UVA_LIB})
+        set(UVA_PATH  "${UVA_F}/gempyrelib/libuv-prefix/src/libuv-build")
+        target_link_options(${LIB_NAME} PRIVATE "/LIBPATH:${UVA_PATH};uv_a.lib")   
+        #add_dependencies(${LIB_NAME} gempyre ${UVA_LIB})
         endif()
     endif()
-
     target_link_libraries (${LIB_NAME} PRIVATE gempyre)
 else()    
     target_link_libraries (${LIB_NAME} PRIVATE gempyre::gempyre)
