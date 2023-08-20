@@ -1,0 +1,156 @@
+name: CMake Build Matrix
+
+on: [push]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "MSVC", artifact: "Windows.tar.xz",
+            os: windows-latest,
+            build_type: "Release",
+          }
+        - {
+            name: "Ubuntu", artifact: "Linux.tar.xz",
+            os: ubuntu-latest,
+            build_type: "Release"
+          }
+        - {
+            name: "MacOS", artifact: "macOS.tar.xz",
+            os: macos-latest,
+            build_type: "Release"
+          }
+
+    steps:
+    
+    - name: Setup Python
+      uses: actions/setup-python@v3.1.3
+      id: cp310
+      with:
+        python-version: "3.10"
+  
+    - uses: actions/checkout@v2  
+    
+    - name: Install scikit-build
+      run: |
+        pip install scikit-build --user
+
+    - name: Setup Chrome
+      uses: browser-actions/setup-chrome@v1  
+
+    - name: Setup DISPLAY
+      if: startsWith(matrix.config.os, 'linux')
+      run: |
+        export DISPLAY=:99
+        sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &       
+
+    - name: Build
+      run: |
+        pip install . --user
+
+    - name: Run tests
+      shell: cmake -P {0}
+      run: |
+        include(ProcessorCount)
+        ProcessorCount(N)
+
+        execute_process(
+          COMMAND ctest -j ${N}
+          WORKING_DIRECTORY ${{ matrix.config.build_dir }}
+          RESULT_VARIABLE result
+        )
+        if (NOT result EQUAL 0)
+          message(FATAL_ERROR "Running tests failed!")
+        endif()
+    
+    - name: Pack
+      shell: bash
+      run: find _skbuild -name cmake-install -exec cmake -E tar cJfv ../${{ matrix.config.artifact }} {} +
+
+    - name: Upload
+      uses: actions/upload-artifact@v1
+      with:
+        path: ./${{ matrix.config.artifact }}
+        name: ${{ matrix.config.artifact }}
+
+  release:
+    if: contains(github.ref, 'tags/v')
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: ncipollo/release-action@v1.12.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        allowUpdates: true
+
+    - name: Store Release url
+      run: |
+        echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
+
+    - uses: actions/upload-artifact@v1
+      with:
+        path: ./upload_url
+        name: upload_url
+
+  publish:
+    if: contains(github.ref, 'tags/v')
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Windows Latest MSVC", artifact: "Windows-MSVC.tar.xz",
+            os: ubuntu-latest
+          }
+        - {
+            name: "Windows Latest MinGW", artifact: "Windows-MinGW.tar.xz",
+            os: ubuntu-latest
+          }
+        - {
+            name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
+            os: ubuntu-latest
+          }
+        - {
+            name: "macOS Latest Clang", artifact: "macOS.tar.xz",
+            os: ubuntu-latest
+          }
+    needs: release
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: ./
+
+    - name: Download URL
+      uses: actions/download-artifact@v1
+      with:
+        name: upload_url
+        path: ./
+    - id: set_upload_url
+      run: |
+        upload_url=`cat ./upload_url`
+        echo ::set-output name=upload_url::$upload_url
+
+    - name: Upload to Release
+      id: upload_to_release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
+        asset_path: ./${{ matrix.config.artifact }}
+        asset_name: ${{ matrix.config.artifact }}
+        asset_content_type: application/x-gtar

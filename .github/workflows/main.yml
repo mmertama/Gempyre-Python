@@ -1,6 +1,7 @@
 name: CMake Build Matrix
 
-on: [push]
+# not run
+# on: [push]
 
 jobs:
   build:
