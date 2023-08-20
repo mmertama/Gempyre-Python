@@ -125,7 +125,7 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest MSVC", artifact: "Windows-MSVC.tar.gz",
+            name: "Windows Latest MSVC", artifact: "Windows.tar.gz",
             os: ubuntu-latest
           }
         - {
