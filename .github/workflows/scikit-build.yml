@@ -32,27 +32,33 @@ jobs:
     steps:
 
     - name: Setup Python
-      uses: actions/setup-python@v3.1.3
-      id: cp310
+      uses: actions/setup-python@v4
+      id: cp38
       with:
-        python-version: "3.10"
+        python-version: "3.8"
   
     - uses: actions/checkout@v2  
-    
     - name: Install scikit-build
       run: |
         pip install scikit-build --user
         pip install build --user
 
-    - name: Setup Chrome
-      uses: browser-actions/setup-chrome@v1  
+    #- name: Setup Chrome
+    #  uses: browser-actions/setup-chrome@v1  
 
-    - name: Setup DISPLAY
-      if: startsWith(matrix.config.os, 'linux')
-      run: |
-        export DISPLAY=:99
-        sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &       
+    #- name: Setup DISPLAY
+    #  if: startsWith(matrix.config.os, 'linux')
+    #  run: |
+    #    export DISPLAY=:99
+    #    sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &       
     
+
+    #- name: Build using CIBuildWheel
+    #  if: startsWith(matrix.config.name, 'Ubuntu')
+    #  uses: pypa/cibuildwheel@v2.15.0
+    #  env:
+    #    CIBW_BUILD: cp38-manylinux_x86_64
+  
     - name: Build for Windows
       if: startsWith(matrix.config.name, 'MSVC')
       shell: pwsh
@@ -61,8 +67,8 @@ jobs:
         $env:TMPDIR = "C:\foo"
         $env:TEMP = "C:\foo"
         python -m build .
-
-    - name: Build for non-Windows
+    
+    - name: Build 
       if: "!startsWith(matrix.config.name, 'MSVC')"
       run: |
         python -m build .

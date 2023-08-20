@@ -2,7 +2,9 @@
 
 set -e
 
-targets=( "Linux" "Windows" "MacOS" )
+# "Linux" binary is not supported in pypi
+
+targets=( "Windows" "MacOS" )
 
 rm -rf dist
 mkdir -p dist
