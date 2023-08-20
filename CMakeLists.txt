@@ -8,7 +8,7 @@ endif()
 
 if(UNIX AND NOT APPLE AND NOT RASPBERRY)
     set(LINUX ON)
-endif()    
+endif()
 
 if(ADD_PATH)
     # for GH actions

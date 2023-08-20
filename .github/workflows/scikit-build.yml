@@ -11,23 +11,26 @@ jobs:
       matrix:
         config:
         - {
-            name: "MSVC", artifact: "Windows.tar.gz",
+            name: "MSVC",
+            artifact: "Windows.tar.gz",
             os: windows-latest,
             build_type: "Release",
           }
         - {
-            name: "Ubuntu", artifact: "Linux.tar.gz",
+            name: "Ubuntu",
+            artifact: "Linux.tar.gz",
             os: ubuntu-latest,
             build_type: "Release"
           }
         - {
-            name: "MacOS", artifact: "macOS.tar.gz",
+            name: "MacOS",
+            artifact: "macOS.tar.gz",
             os: macos-latest,
             build_type: "Release"
           }
 
     steps:
-    
+
     - name: Setup Python
       uses: actions/setup-python@v3.1.3
       id: cp310
@@ -49,8 +52,18 @@ jobs:
       run: |
         export DISPLAY=:99
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &       
+    
+    - name: Build for Windows
+      if: startsWith(matrix.config.name, 'MSVC')
+      shell: pwsh
+      run: |
+        mkdir C:\foo
+        $env:TMPDIR = "C:\foo"
+        $env:TEMP = "C:\foo"
+        python -m build .
 
-    - name: Build
+    - name: Build for non-Windows
+      if: "!startsWith(matrix.config.name, 'MSVC')"
       run: |
         python -m build .
 
