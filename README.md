@@ -42,6 +42,8 @@ Windows default filepath length is an issue.
 See [Here](https://www.howtogeek.com/266621/how-to-make-windows-10-accept-file-paths-over-260-characters/)
 and [Here](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=powershell)
 
+(reboot after change)
+
 If that does not help (or not an option) you may try say in powershell.
 
 ```
