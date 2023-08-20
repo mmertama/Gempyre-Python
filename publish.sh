@@ -18,3 +18,5 @@ for value in "${targets[@]}"; do
     rm $value.tar.gz
 done
 
+twine upload dist/*
+
