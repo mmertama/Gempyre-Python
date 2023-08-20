@@ -20,7 +20,7 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-  "pygobject", "pyqt5" , "pywebview", "pyqtwebengine", "pywebview[qt]", "websockets"
+  "pyqt5" , "pywebview", "pyqtwebengine", "pywebview[qt]", "websockets"
 ]
 
 [project.urls]
