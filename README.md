@@ -18,8 +18,8 @@ Create a venv (https://docs.python.org/3/library/venv.html)
     pip install .
   ```
 
-### Notes:
-#### Raspberry OS
+## Notes:
+### Raspberry OS
 
 Todo: Needs optional RASPEBERRY flag to be passed to CMake. 
   
@@ -28,7 +28,7 @@ Todo: Needs optional RASPEBERRY flag to be passed to CMake.
 You may need python3-dev and python3-pip be installed. This may depend on your evironment,
 In linux e.g. apt-get install python3-dev, in MacOS look brew.
 
-#### Windows:
+### Windows:
 
 ```
 # Windows has a limit of path lengths to 260 chars - 8-+ 
@@ -38,7 +38,20 @@ In linux e.g. apt-get install python3-dev, in MacOS look brew.
 
 ```
 
-That may cause troubles (especially with python -m build).
+Windows default filepath length is an issue. 
+See [Here](https://www.howtogeek.com/266621/how-to-make-windows-10-accept-file-paths-over-260-characters/)
+and [Here](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=powershell)
+
+If that does not help (or not an option) you may try say in powershell.
+
+```
+mkdir C:\f
+$env:TMPDIR = "C:\f"
+$env:TEMP = "C:\f"
+
+```
+
+...before pip install. 
 
 
 ### Run
