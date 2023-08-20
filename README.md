@@ -2,105 +2,32 @@
 
 The easy and productive UI library for Python. 
 
-## Build
+## Gempyre
 
-Install Gempyre (https://github.com/mmertama/Gempyre.git), see Gempyre
-installation. 
+Gempyre is a C++ GUI library, see https://github.com/mmertama/Gempyre.git.
 
-Clone Gempyre-Python (https://github.com/mmertama/Gempyre-Python.git)
+## install for PyPi
 
-You need python3-dev and python3-pip be installed. This may depend on your evironment, e.g. apt-get install python3-dev.
+pip install Gempyre  
 
-I mostly assume Python 3.8, but if you have python 3.9 installed, then 
-    bash```
-    pip install --pre pythonnet
-    ```
-may be needed.
+## Build from sources
 
-### For Linux
-    ```bash
-    mkdir -p build
-    pushd build
-    cmake ..
-    cmake --build . --config Release
-    pip3 install -e .. --user
-    popd
-    ```
+You need python3-dev and python3-pip be installed. This may depend on your evironment,
+In linux e.g. apt-get install python3-dev.
+
+## Most Linux, Windows and MacOS
+
+  ```bash
+    pip install . --user
+  ```
+
+  If you are using venv, "--user" can be omitted.
 
 ### For Raspberry OS
-    ```bash
-    mkdir -p build
-    pushd build
-    cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DRASPBERRY=1
-    cmake --build . --config Release
-    pip3 install -e .. --user
-    popd
-    ```
-
-### For MacOS
-  ```bash
-  mkdir -p build
-  pushd build
-  cmake .. -DCMAKE_BUILD_TYPE=RELEASE
-  cmake --build . --config Release
-  pip3 install -e .. --user
-  popd
-  ```
   
-### For Windows
-* For Windows you use either MSVC (at least Visual Studio 19) toolchain, or
-MinGW 64-bit. Please note that in Windows you may have several Pythons's installed. 
-There may at least be one Windows provided and one that come along MinGW or MSys.
-
-Use respective pip3 of which Python you want to use. In the examples below the MSVC built
-is installed to Windows system Python (as started from Command Prompt), and MinGW version is
-is installed to MinGW shell as installed within that environment. 
-
-Use 
-  ```bat
-  py -0p
-  ```
-and
-
-  ```bash
-  which python3
-  ```
-  
-  ```bash
-  where python3 
-  ```
-
-To figure out the installed Python path.
-
-#### For Windows MSVC
-* From Windows menu, Visual Studio: Open "x64 Native Tools Command Prompt for VS 2019"
     ```bash
-    if not exist "msvc_build" mkdir msvc_build
-    pushd msvc_build
-    cmake .. -DCMAKE_BUILD_TYPE=Release
-    cmake --build . --config Release
-    pip3 install -e .. --user
-    popd
+   RASPBERRY=pip install . --user
     ```
-
-#### For Windows MinGW
-* To install pip:
-    ```bash
-    pacman -S mingw-w64-x86_64-python-pip
-    ```
-* To install python:
-    ```bash
-    pacman -S mingw-w64-i686-python3
-    ```
-* Make sure you are using the right MinGW shell (Msys minGW 64-bit - one with blue icon (Not brown or cyan :-))
-    ```bash
-    mkdir -p mingw_build
-    pushd mingw_build
-    $ cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DPYTHON_PATH=C:\\msys64\\mingw64\\bin
-    cmake --build . --config Release
-    pip3 install -e .. --user
-    popd
-  ```
 
 ### Run
 
