@@ -165,8 +165,8 @@ if( DEFINED gempyre_BINARY_DIR )
 
 if(SKBUILD)
     if(WIN32)
-      # Otherwise this is injected withing find_package
-      # Look path as lib may not exits at this phase
+        # Otherwise this is injected withing find_package
+        # Look path as lib may not exits at this phase
         file(GLOB_RECURSE UVA_D LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/*gempyrelib)
         list(FILTER UVA_D INCLUDE REGEX gempyre-build)
         if(NOT UVA_D)
@@ -174,8 +174,10 @@ if(SKBUILD)
         endif()
         list(GET UVA_D 0 UVA_F)
         set(UVA_PATH  "${UVA_F}/gempyrelib/libuv-prefix/src/libuv-build")
+        # target_link_libraries requires that a the lib can be resolved - however
+        # as here we get it only when the fetch's add_external project has done it
+        # it is is added only as a compiler parameter.
         target_link_options(${LIB_NAME} PRIVATE "/LIBPATH:${UVA_PATH};uv_a.lib")   
-        #add_dependencies(${LIB_NAME} gempyre ${UVA_LIB})
         endif()
     endif()
     target_link_libraries (${LIB_NAME} PRIVATE gempyre)
