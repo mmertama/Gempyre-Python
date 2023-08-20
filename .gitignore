@@ -32,3 +32,6 @@ Gempyre.cp38-win_amd64.pyd Gempyre.cp39-mingw_x86_64.pyd
 *.pyd
 cmake-build-debug
 .vscode
+.MANIFET.in
+.MANIFEST.in
+MANIFEST.in

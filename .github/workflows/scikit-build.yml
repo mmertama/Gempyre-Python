@@ -11,17 +11,17 @@ jobs:
       matrix:
         config:
         - {
-            name: "MSVC", artifact: "Windows.tar.xz",
+            name: "MSVC", artifact: "Windows.tar.gz",
             os: windows-latest,
             build_type: "Release",
           }
         - {
-            name: "Ubuntu", artifact: "Linux.tar.xz",
+            name: "Ubuntu", artifact: "Linux.tar.gz",
             os: ubuntu-latest,
             build_type: "Release"
           }
         - {
-            name: "MacOS", artifact: "macOS.tar.xz",
+            name: "MacOS", artifact: "macOS.tar.gz",
             os: macos-latest,
             build_type: "Release"
           }
@@ -39,6 +39,7 @@ jobs:
     - name: Install scikit-build
       run: |
         pip install scikit-build --user
+        pip install build --user
 
     - name: Setup Chrome
       uses: browser-actions/setup-chrome@v1  
@@ -51,7 +52,7 @@ jobs:
 
     - name: Build
       run: |
-        pip install . --user
+        python -m build .
 
     #- name: Run tests
     #  shell: cmake -P {0}
@@ -71,7 +72,7 @@ jobs:
     - name: Pack
       shell: bash
       run: |
-        find _skbuild -name cmake-install -exec cmake -E tar cJfv ${{ matrix.config.artifact }} {} +
+        cmake -E tar cvzf ${{ matrix.config.artifact }} dist/
 
     - name: Upload
       uses: actions/upload-artifact@v1
