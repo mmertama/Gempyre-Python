@@ -125,19 +125,15 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest MSVC", artifact: "Windows-MSVC.tar.xz",
+            name: "Windows Latest MSVC", artifact: "Windows-MSVC.tar.gz",
             os: ubuntu-latest
           }
         - {
-            name: "Windows Latest MinGW", artifact: "Windows-MinGW.tar.xz",
+            name: "Ubuntu Latest GCC", artifact: "Linux.tar.gz",
             os: ubuntu-latest
           }
         - {
-            name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
-            os: ubuntu-latest
-          }
-        - {
-            name: "macOS Latest Clang", artifact: "macOS.tar.xz",
+            name: "macOS Latest Clang", artifact: "macOS.tar.gz",
             os: ubuntu-latest
           }
     needs: release
