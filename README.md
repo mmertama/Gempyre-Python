@@ -18,16 +18,17 @@ Create a venv (https://docs.python.org/3/library/venv.html)
     pip install .
   ```
 
-### For Raspberry OS
+### Notes:
+#### Raspberry OS
+
+Todo: Needs optional RASPEBERRY flag to be passed to CMake. 
   
-    ```bash
-   RASPBERRY=pip install .
-    ```
+### Missing libraries  
 
 You may need python3-dev and python3-pip be installed. This may depend on your evironment,
-In linux e.g. apt-get install python3-dev.
+In linux e.g. apt-get install python3-dev, in MacOS look brew.
 
-And in Windows:
+#### Windows:
 
 ```
 # Windows has a limit of path lengths to 260 chars - 8-+ 
