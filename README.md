@@ -6,28 +6,26 @@ The easy and productive UI library for Python.
 
 Gempyre is a C++ GUI library, see https://github.com/mmertama/Gempyre.git.
 
-## install for PyPi
+## install from PyPi
 
 pip install Gempyre  
 
 ## Build from sources
 
-You need python3-dev and python3-pip be installed. This may depend on your evironment,
-In linux e.g. apt-get install python3-dev.
-
-## Most Linux, Windows and MacOS
+Create a venv (https://docs.python.org/3/library/venv.html)
 
   ```bash
-    pip install . --user
+    pip install .
   ```
-
-  If you are using venv, "--user" can be omitted.
 
 ### For Raspberry OS
   
     ```bash
-   RASPBERRY=pip install . --user
+   RASPBERRY=pip install .
     ```
+
+You may need python3-dev and python3-pip be installed. This may depend on your evironment,
+In linux e.g. apt-get install python3-dev.
 
 ### Run
 
