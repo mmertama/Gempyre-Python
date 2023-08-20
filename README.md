@@ -64,7 +64,7 @@ Please note that Gempyre Core and Gempyre Graphics are part of Python API, but n
 
 See [examples and demos](https://github.com/mmertama/Gempyre-Python/tree/master/examples)
 
-See [smalle test apps](https://github.com/mmertama/Gempyre-Python/tree/master/test)
+See [small test apps](https://github.com/mmertama/Gempyre-Python/tree/master/test)
 
 ### Minimum single file app
 
