@@ -8,15 +8,21 @@ Gempyre is a C++ GUI library, see https://github.com/mmertama/Gempyre.git.
 
 ## install from PyPi
 
-pip install Gempyre  
+There are many flavors in installing - but you need at least Python3.8
+on Linux, Windows or MacOS. 
+
+e.g.
+
+```bash
+pip3 install Gempyre --user  
+```
+Installs Gempyre to the current user site-packages.
+
+See also Create a venv (https://docs.python.org/3/library/venv.html)
 
 ## Build from sources
 
-Create a venv (https://docs.python.org/3/library/venv.html)
-
-  ```bash
-    pip install .
-  ```
+You can clone the repository and do install, or get releases from repository.
 
 ## Notes:
 ### Raspberry OS
