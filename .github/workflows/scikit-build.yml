@@ -154,11 +154,8 @@ jobs:
         with:
           name:  gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1.12.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          allowUpdates: true
-          artifactErrorsFailBuild: true
-          gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
+          files: gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
+          
