@@ -149,19 +149,19 @@ jobs:
         shell: bash
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV  
 
-      - name: Verify version
-        shell: bash
-        run: |
-          VER=$(grep -e '^\s*version\s*=\s*\"' pyproject.toml | cut -d '"' -f 2)
-          if [[ "${{ env.RELEASE_VERSION }}" != "$VER" ]]; then
-            echo "Invalid version in pyrproject.toml $VER"
-            exit 1
-          fi  
-
       - name: Download a Build Artifact
         uses: actions/download-artifact@v2.1.1
         with:
           name:  gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
+
+      - name: Verify version
+        shell: bash
+        run: |
+          VER=$(tar -tvf gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }} | grep 'dist/Gempyre-.*-' | cut -d '-' -f 8)
+          if [[ "${{ env.RELEASE_VERSION }}" != "$VER" ]]; then
+            echo "Invalid version in pyrproject.toml $VER"
+            exit 1
+          fi      
 
       - name: Release
         uses: softprops/action-gh-release@v1
