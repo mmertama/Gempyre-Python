@@ -157,8 +157,9 @@ jobs:
       - name: Verify version
         shell: bash
         run: |
-          VER=$(tar -tvf gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }} | grep 'dist/Gempyre-.*-' | cut -d '-' -f 8)
+          VER=$(tar -tf gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }} | grep 'dist/Gempyre-.*-' | cut -d '-' -f 2)
           if [[ "${{ env.RELEASE_VERSION }}" != "$VER" ]]; then
+            tar -tf gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }} 
             echo "Invalid version in pyrproject.toml $VER"
             exit 1
           fi      
