@@ -35,3 +35,4 @@ cmake-build-debug
 .MANIFET.in
 .MANIFEST.in
 MANIFEST.in
+.DS_Store
