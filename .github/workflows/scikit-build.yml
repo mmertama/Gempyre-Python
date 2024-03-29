@@ -100,17 +100,21 @@ jobs:
     #    if (NOT result EQUAL 0)
     #      message(FATAL_ERROR "Running tests failed!")
     #    endif()
+
+    - name: Set env
+      shell: bash
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV  
     
     - name: Pack
       shell: bash
       run: |
-        cmake -E tar cvzf ${{ matrix.config.artifact }} dist/
+        cmake -E tar cvzf gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }} dist/
 
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        path: ./${{ matrix.config.artifact }}
-        name: ${{ matrix.config.artifact }}
+        path: ./gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
+        name: gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
 
   release:
     if: contains(github.ref, 'tags/v')
@@ -156,12 +160,16 @@ jobs:
             os: ubuntu-latest
           }
     needs: release
-
+    
     steps:
+    - name: Set env
+      shell: bash
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV  
+
     - name: Download artifact
       uses: actions/download-artifact@v1
       with:
-        name: ${{ matrix.config.artifact }}
+        name: gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
         path: ./
 
     - name: Download URL
@@ -181,6 +189,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
-        asset_path: ./${{ matrix.config.artifact }}
-        asset_name: ${{ matrix.config.artifact }}
+        asset_path: ./gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
+        asset_name: gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
         asset_content_type: application/x-gtar

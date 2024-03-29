@@ -18,5 +18,8 @@ for value in "${targets[@]}"; do
     rm $value.tar.gz
 done
 
-twine upload dist/*
+USER=__token__
+PASS=$(cat $1)
+
+twine upload dist/* -u $USER -p $PASS 
 
