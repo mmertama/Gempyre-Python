@@ -1,6 +1,8 @@
 # Gempyre-Python 
 
-The easy and productive UI library for Python. 
+The easy and productive UI library for Python.
+
+If you know HTML, Gempyre is for you!
 
 ## Gempyre
 
