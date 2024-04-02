@@ -56,6 +56,8 @@ class Bee:
 
     def move(self):
         bee, dist = self.swarm.closest(self)
+        if not bee:
+            return
         if dist < self.min_distance:
             xx = self.x - bee.x
             yy = self.y - bee.y
