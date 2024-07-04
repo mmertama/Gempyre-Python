@@ -29,7 +29,7 @@ dependencies = [
 [tool.scikit-build]
 cmake.minimum-version = "3.18"
 cmake.args = []
-cmake.build-type = "Release"
+cmake.build-type = "Debug"
 cmake.targets = []
 wheel.py-api = "cp310"
 wheel.license-files = ["LICEN[CS]E*", "COPYING*", "NOTICE*", "AUTHORS*"]

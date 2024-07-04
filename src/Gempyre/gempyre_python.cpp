@@ -40,7 +40,13 @@ static std::optional<std::string> GempyreExtensionGet(Gempyre::Ui* ui, const std
         }
     }
     std::optional<std::any> ext =  ui->extension_get(callId, params);
-    return ext ? GempyreUtils::to_json_string(*ext) : std::nullopt;
+    if(ext) {
+        const auto result = GempyreUtils::to_json_string(*ext);
+        if(result) {
+            return result.value();
+        }
+    }
+    return std::nullopt;
 }
 
 static void GempyreExtensionCall(Gempyre::Ui* ui, const std::string& callId, const std::unordered_map<std::string, std::string>& parameters) {

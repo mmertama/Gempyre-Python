@@ -37,6 +37,14 @@ Todo: Needs optional RASPEBERRY flag to be passed to CMake.
 You may need python3-dev and python3-pip be installed. This may depend on your evironment,
 In linux e.g. apt-get install python3-dev, in MacOS look brew.
 
+### Build with scikit-build
+
+$ pip install scikit-build
+$ rm -rf _skbuild
+$ pip install .
+$ python3 examples/balls/balls.py
+
+
 ### Windows:
 
 ```
