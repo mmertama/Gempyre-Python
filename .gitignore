@@ -36,3 +36,4 @@ cmake-build-debug
 .MANIFEST.in
 MANIFEST.in
 .DS_Store
+venv

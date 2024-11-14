@@ -120,8 +120,8 @@ PYBIND11_MODULE(_gempyre, m) {
                  }, properties, throttle);
                 }, py::arg("name"), py::arg("handler"), py::arg("properties") = std::vector<std::string>{}, py::arg("throttle") = 0ms)
             .def("set_html", &Gempyre::Element::set_html)
-            .def("set_attribute",  py::overload_cast<const std::string&, const std::string&>(&Gempyre::Element::set_attribute))
-            .def("set_boolean_attribute",  py::overload_cast<const std::string&>(&Gempyre::Element::set_attribute))
+            .def("set_attribute",  py::overload_cast<std::string_view, std::string_view>(&Gempyre::Element::set_attribute))
+            .def("set_boolean_attribute",  py::overload_cast<std::string_view>(&Gempyre::Element::set_attribute))
             .def("remove_attribute", &Gempyre::Element::remove_attribute)
             .def("set_style", &Gempyre::Element::set_style)
             //.def("remove_style", &Gempyre::Element::removeStyle)
@@ -137,7 +137,7 @@ PYBIND11_MODULE(_gempyre, m) {
                 return r ? std::make_optional<RectF>(::rectF(*r)) :  std::nullopt;
                 });
     py::class_<Gempyre::Ui>(m, "Ui")
-        .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, int, int, 
+        .def(py::init<const Gempyre::Ui::FileMap&, const std::string&, const std::string&, int, int, 
          int, std::unordered_map<std::string, std::string>,
          unsigned int, const std::string& >(),
              py::arg("filemap"),
@@ -150,7 +150,7 @@ PYBIND11_MODULE(_gempyre, m) {
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
              )
-         .def(py::init<const Gempyre::Ui::Filemap&, const std::string&, const std::string&, const std::string&, unsigned int, const std::string& >(),
+         .def(py::init<const Gempyre::Ui::FileMap&, const std::string&, const std::string&, const std::string&, unsigned int, const std::string& >(),
              py::arg("filemap"),
              py::arg("index_html"),
              py::arg("browser"),
@@ -162,8 +162,8 @@ PYBIND11_MODULE(_gempyre, m) {
         .def_readonly_static("UseDefaultRoot", &Gempyre::Ui::UseDefaultRoot)
         .def("run", &Gempyre::Ui::run, py::call_guard<py::gil_scoped_release>())
         .def("exit", &Gempyre::Ui::exit)
-        .def("close", [](Gempyre::Ui* ui) {
-            PyErr_WarnEx(PyExc_DeprecationWarning, "use exit", 1); ui->close();})
+        //.def("close", [](Gempyre::Ui* ui) {
+        //    PyErr_WarnEx(PyExc_DeprecationWarning, "use exit", 1); ui->close();})
         .def("on_exit", [](Gempyre::Ui* ui, std::function<void ()> onExitFunction = nullptr)-> auto {
             return ui->on_exit(onExitFunction ? [onExitFunction]() {
                 py::gil_scoped_acquire acquire;
