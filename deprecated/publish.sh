@@ -5,8 +5,7 @@ rm -rf dist
 mkdir dist
 pushd dist
 
-REL=v1.2.6r
-
+REL=v1.5.1
 
 # get artifacts
 ARTS=("Linux.tar.xz" "macOS.tar.xz" "Windows-MSVC.tar.xz")

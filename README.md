@@ -16,6 +16,12 @@ e.g.
 ```bash
 pip3 install Gempyre --user  
 ```
+or using Poetry
+
+```bash
+poetry add Gempyre
+```
+
 Installs Gempyre to the current user site-packages.
 
 See also Create a venv (https://docs.python.org/3/library/venv.html)
@@ -39,11 +45,13 @@ In linux e.g. apt-get install python3-dev, in MacOS look brew.
 
 ### Build with scikit-build
 
-$ pip install scikit-build
-$ rm -rf _skbuild
-$ pip install .
-$ python3 examples/balls/balls.py
-
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip3 install scikit-build
+pip3 install .
+python3 examples/balls/balls.py
+```
 
 ### Windows:
 
