@@ -111,8 +111,9 @@ jobs:
         cmake -E tar cvzf gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }} dist/
 
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
+        overwrite: true
         path: ./gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
         name: gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
 
@@ -150,7 +151,7 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV  
 
       - name: Download a Build Artifact
-        uses: actions/download-artifact@v2.1.1
+        uses: actions/download-artifact@v4
         with:
           name:  gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }}
 
