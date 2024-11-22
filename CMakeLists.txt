@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.24)
 
 project(gempyrepy LANGUAGES CXX C)
 
@@ -8,6 +8,12 @@ endif()
 
 if(UNIX AND NOT APPLE AND NOT RASPBERRY)
     set(LINUX ON)
+endif()
+
+if (APPLE)
+    if (NOT DEFINED NATIVE_ARCHITECURE)
+        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Universal binary" FORCE)
+    endif()    
 endif()
 
 if(ADD_PATH)
@@ -109,7 +115,7 @@ include_directories (
 # TODO remove this and just mark pybind11 as a dependency
 FetchContent_Declare( pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG        v2.11.1
+    GIT_TAG        v2.13.6
 )
 
 FetchContent_GetProperties(pybind11)

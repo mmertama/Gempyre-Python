@@ -341,7 +341,7 @@ class Game:
 
         if self.wave_count > 0:
             if random.randint(0, self.game_speed) == 1:
-                x_pos = random.randint(0, self.width - MONSTER_WIDTH)
+                x_pos = random.randint(0, int(self.width - MONSTER_WIDTH))
                 is_ok = True
                 for x in gaps:
                     if (x_pos > x) or (x_pos < x + MONSTER_WIDTH):

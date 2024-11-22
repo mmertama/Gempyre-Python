@@ -87,6 +87,28 @@ static std::string findBrowser() {
 }
 */
 
+
+using PyFileMap = std::map<std::string, std::string>;
+#if 0 // not used
+static Gempyre::Ui::FileMap to_map(PyFileMap&& map) {
+    Gempyre::Ui::FileMap fmap;
+    fmap.reserve(map.size());
+    for(auto&& [k,v] : map) {
+        fmap.push_back(std::make_pair(std::move(k), std::move(v)));
+    }
+    return fmap;
+}
+#endif
+static Gempyre::Ui::FileMap to_map(const PyFileMap& map) {
+    Gempyre::Ui::FileMap fmap;
+    fmap.reserve(map.size());
+    for(const auto& [k,v] : map) {
+        fmap.push_back(std::make_pair(k, v));
+    }
+    return fmap;
+}
+
+
 PYBIND11_MODULE(_gempyre, m) {
     m.def("set_debug", &Gempyre::set_debug, py::arg("is_debug") = true);
     m.def("version", &Gempyre::version);
@@ -137,9 +159,14 @@ PYBIND11_MODULE(_gempyre, m) {
                 return r ? std::make_optional<RectF>(::rectF(*r)) :  std::nullopt;
                 });
     py::class_<Gempyre::Ui>(m, "Ui")
-        .def(py::init<const Gempyre::Ui::FileMap&, const std::string&, const std::string&, int, int, 
-         int, std::unordered_map<std::string, std::string>,
-         unsigned int, const std::string& >(),
+        .def(py::init([](
+            const std::map<std::string, std::string>& map, 
+            std::string_view html, 
+            std::string_view title,
+            int w, int h, int flags, const std::unordered_map<std::string, std::string>& params,int port, 
+            std::string_view root) { 
+                return std::make_unique<Gempyre::Ui>(to_map(map), html, title, w, h, flags, params, port, root);
+            }),
              py::arg("filemap"),
              py::arg("index_html"),
              py::arg("title") = "",
@@ -148,8 +175,37 @@ PYBIND11_MODULE(_gempyre, m) {
              py::arg("flags") = 0,
              py::arg("ui_params") = std::unordered_map<std::string, std::string>{},
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
-             py::arg("root") = Gempyre::Ui::UseDefaultRoot
-             )
+             py::arg("root") = Gempyre::Ui::UseDefaultRoot)
+        #if 0     
+        .def(py::init<const Gempyre::Ui::FileMap&, const std::string&, const std::string&, int, int, 
+         int, std::unordered_map<std::string, std::string>,
+         unsigned int, const std::string& >(),
+            py::arg("filemap"),
+            py::arg("index_html"),
+            py::arg("title") = "",
+            py::arg("width") = 620,
+            py::arg("height") = 640,
+            py::arg("flags") = 0,
+            py::arg("ui_params") = std::unordered_map<std::string, std::string>{},
+            py::arg("port") = Gempyre::Ui::UseDefaultPort,
+            py::arg("root") = Gempyre::Ui::UseDefaultRoot
+            )
+        #endif    
+        .def(py::init([](const std::map<std::string, std::string>& map,
+            std::string_view html,
+            std::string_view browser,
+            std::string_view browser_params,
+            int port = static_cast<int>(Gempyre::Ui::UseDefaultPort),
+            std::string_view root = Gempyre::Ui::UseDefaultRoot) {
+                return std::make_unique<Gempyre::Ui>(to_map(map), html, browser, browser_params, port, root);
+            }),
+            py::arg("filemap"),
+            py::arg("index_html"),
+            py::arg("browser"),
+            py::arg("browser_params"),
+            py::arg("port") = Gempyre::Ui::UseDefaultPort,
+            py::arg("root") = Gempyre::Ui::UseDefaultRoot)
+        #if 0        
          .def(py::init<const Gempyre::Ui::FileMap&, const std::string&, const std::string&, const std::string&, unsigned int, const std::string& >(),
              py::arg("filemap"),
              py::arg("index_html"),
@@ -158,6 +214,7 @@ PYBIND11_MODULE(_gempyre, m) {
              py::arg("port") = Gempyre::Ui::UseDefaultPort,
              py::arg("root") = Gempyre::Ui::UseDefaultRoot
              )
+        #endif     
         .def_readonly_static("UseDefaultPort", &Gempyre::Ui::UseDefaultPort)
         .def_readonly_static("UseDefaultRoot", &Gempyre::Ui::UseDefaultRoot)
         .def("run", &Gempyre::Ui::run, py::call_guard<py::gil_scoped_release>())
@@ -242,8 +299,8 @@ PYBIND11_MODULE(_gempyre, m) {
                 .def(py::init<const Gempyre::CanvasElement&>())
                 .def(py::init<Gempyre::Ui&, const std::string&>())
                 .def(py::init<Gempyre::Ui&, const std::string&, const Gempyre::Element&>())
-                .def("add_image", [](Gempyre::CanvasElement* canvas, const std::string& url, const std::function<void (const std::string&)> loaded = nullptr){
-                    return canvas->add_image(url, [loaded](const std::string& id) {if(loaded) {py::gil_scoped_acquire acquire; loaded(id);}});})
+                .def("add_image", [](Gempyre::CanvasElement* canvas, const std::string& url, const std::function<void (const std::string& id)> loaded = nullptr){
+                    return canvas->add_image(url, [loaded](std::string_view id) {if(loaded) {py::gil_scoped_acquire acquire; loaded(std::string{id});}});})
                 .def("paint_image", [](Gempyre::CanvasElement* el, const std::string& imageId, int x, int y, const RectF& clippingRect) {
                     el->paint_image(imageId, x, y, clippingRect);
                     }, py::arg("imageId"), py::arg("x"), py::arg("y"), py::arg("clippingRect") = RectF{0, 0, 0, 0})
@@ -334,7 +391,7 @@ PYBIND11_MODULE(_gempyre, m) {
                 .def("translate", &Gempyre::FrameComposer::translate)
                 .def("scale", &Gempyre::FrameComposer::scale)
                 .def("text_baseline", &Gempyre::FrameComposer::text_baseline)
-                .def("draw_image", py::overload_cast<const std::string&, double, double>(&Gempyre::FrameComposer::draw_image))
+                .def("draw_image", py::overload_cast<std::string_view, double, double>(&Gempyre::FrameComposer::draw_image))
                 .def("draw_image_rect", [](Gempyre::FrameComposer* fc, const std::string& id, const RectF& r) {fc->draw_image(id, r);})
                 .def("draw_image_clip", [](Gempyre::FrameComposer* fc, const std::string& id, const RectF& c, const RectF& r){fc->draw_image(id, c, r);})
                 .def("composed", &Gempyre::FrameComposer::composed)

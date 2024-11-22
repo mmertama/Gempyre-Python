@@ -4,6 +4,11 @@ set -e
 
 # "Linux" binary is not supported in pypi
 
+if [ -z "$1" ]; then
+        echo "publish.sh <PASS_WORD_FILE>"
+	exit 1     
+fi
+
 targets=( "Windows" "MacOS" )
 
 mkdir -p /tmp/grel
