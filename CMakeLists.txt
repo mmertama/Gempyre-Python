@@ -191,8 +191,8 @@ if( DEFINED gempyre_BINARY_DIR )
                 # it is is added only as a compiler parameter.
                 target_link_options(${LIB_NAME} PRIVATE "/LIBPATH:${UVA_PATH};uv_a.lib")
             else() # as above
-                file(GLOB_RECURSE LWS_LIB_FIND LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/*libwebsockets-build)
-                list(FILTER LWS_LIB_FIND INCLUDE REGEX gempyre-build)
+                file(GLOB_RECURSE LWS_LIB_FIND LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/gempyre-build)
+                list(FILTER LWS_LIB_FIND INCLUDE REGEX libwebsockets-build)
                 if(NOT LWS_LIB_FIND)
                     message(FATAL_ERROR "Cannot find libwebsockets from ${CMAKE_SOURCE_DIR}/_skbuild")
                 endif()
