@@ -166,10 +166,15 @@ if(NOT SKBUILD)
     )
 endif()
 
+message("gempyre_BINARY_DIR:${gempyre_BINARY_DIR}")
+message("SKBUILD:${SKBUILD}")
+message("WIN32:${WIN32}")
+message("USE_UWEBSOCKETS:${USE_UWEBSOCKETS}")
+
 if( DEFINED gempyre_BINARY_DIR )
     if(SKBUILD)
         if(WIN32)
-            option(USE_UWEBSOCKETS "Turn on if Gempyre uses uwebsockets" OFF)
+            #option(USE_UWEBSOCKETS "Turn on if Gempyre uses uwebsockets" OFF)
             if (USE_UWEBSOCKETS)
                 # Otherwise this is injected withing find_package
                 # Look path as lib may not exits at this phase
