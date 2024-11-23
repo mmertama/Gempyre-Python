@@ -173,17 +173,27 @@ if( DEFINED gempyre_BINARY_DIR )
             if (USE_UWEBSOCKETS)
                 # Otherwise this is injected withing find_package
                 # Look path as lib may not exits at this phase
-                file(GLOB_RECURSE UVA_D LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/*gempyrelib)
-                list(FILTER UVA_D INCLUDE REGEX gempyre-build)
-                if(NOT UVA_D)
+                file(GLOB_RECURSE GEMPYRE_LIB_FIND LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/*gempyrelib)
+                list(FILTER GEMPYRE_LIB_FIND INCLUDE REGEX gempyre-build)
+                if(NOT GEMPYRE_LIB_FIND)
                     message(FATAL_ERROR "Cannot find gempyrelib from ${CMAKE_SOURCE_DIR}/_skbuild")
                 endif()
-                list(GET UVA_D 0 UVA_F)
-                set(UVA_PATH  "${UVA_F}/gempyrelib/libuv-prefix/src/libuv-build")
+                list(GET GEMPYRE_LIB_FIND 0 GEMPYRE_LIB_FOLDER)
+           
+                set(UVA_PATH  "${GEMPYRE_LIB_FOLDER}/gempyrelib/libuv-prefix/src/libuv-build")
                 # target_link_libraries requires that a the lib can be resolved - however
                 # as here we get it only when the fetch's add_external project has done it
                 # it is is added only as a compiler parameter.
                 target_link_options(${LIB_NAME} PRIVATE "/LIBPATH:${UVA_PATH};uv_a.lib")
+            else() # as above
+                file(GLOB_RECURSE LWS_LIB_FIND LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/*libwebsockets-build)
+                list(FILTER LWS_LIB_FIND INCLUDE REGEX gempyre-build)
+                if(NOT LWS_LIB_FIND)
+                    message(FATAL_ERROR "Cannot find libwebsockets from ${CMAKE_SOURCE_DIR}/_skbuild")
+                endif()
+                list(GET LWS_LIB_FIND 0 LWS_LIB_FOLDER)
+                set(LWS_LIB_PATH  "${LWS_LIB_FOLDER}/lib")
+                target_link_options(${LIB_NAME} PRIVATE "/LIBPATH:${LWS_LIB_PATH};websockets_static.lib")
             endif()   
         endif()
     endif()
