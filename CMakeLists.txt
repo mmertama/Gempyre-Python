@@ -66,6 +66,7 @@ else()
         endif()
     endif() 
     find_path(PYTHON_HEADER_PATH "Python.h" HINTS ${Python3_INCLUDE_DIRS})
+    add_compile_options(-fPIC)
 endif()
 
 include_directories(${PYTHON_INCLUDE_PATH})
@@ -85,9 +86,6 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-add_compile_options(-fPIC)
-
-
 
 # gempyre has to be installed
 find_package(gempyre QUIET)
