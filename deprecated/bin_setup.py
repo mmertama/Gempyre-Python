@@ -8,7 +8,7 @@ import subprocess
 
 setup (
         name='Gempyre',
-        version='1.6.0',
+        version='1.6.1',
         license='MIT',
         description='Gempyre Framework',
         author='Markus Mertama',

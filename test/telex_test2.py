@@ -53,7 +53,9 @@ for n in name:
 input = Gempyre.Element(ui, "command_line")
 output = Gempyre.Element(ui, "output")
 
-decoding = 'CP850' if psutil.Process(os.getpid()).parent().name() == 'cmd.exe' else 'utf-8'
+process = psutil.Process(os.getpid())
+parent = process.parent()
+decoding = 'CP850' if parent and parent.name() == 'cmd.exe' else 'utf-8'
 
 
 def do_run(ev):

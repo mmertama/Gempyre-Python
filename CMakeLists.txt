@@ -91,13 +91,14 @@ add_compile_options(-fPIC)
 
 # gempyre has to be installed
 find_package(gempyre QUIET)
-    if(NOT gempyre_FOUND)
-        set (HAS_AFFILIATES OFF CACHE INTERNAL "Turn off") 
-        set (HAS_TEST OFF CACHE INTERNAL "Turn off") 
-        set (NO_EXPORT TRUE CACHE INTERNAL "Turn off")
-        FetchContent_Declare(gempyre
-        GIT_REPOSITORY https://github.com/mmertama/Gempyre.git
-    )
+
+if(NOT gempyre_FOUND)
+    message("Locally installed Gempyre lib was not found - retrieve one from repository")
+    set (HAS_AFFILIATES OFF CACHE INTERNAL "Turn off")
+    set (HAS_TEST OFF CACHE INTERNAL "Turn off")
+    set (NO_EXPORT TRUE CACHE INTERNAL "Turn off")
+    FetchContent_Declare(gempyre
+    GIT_REPOSITORY https://github.com/mmertama/Gempyre.git)
 
     FetchContent_GetProperties(gempyre)
 
@@ -160,30 +161,32 @@ add_custom_command(
 )
 
 if(NOT SKBUILD)
-add_custom_command(
-  TARGET ${LIB_NAME}
-  POST_BUILD
-  COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
-)
+    add_custom_command(
+    TARGET ${LIB_NAME}
+    POST_BUILD
+    COMMAND ${PYTHON3} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py sdist bdist_wheel
+    )
 endif()
 
 if( DEFINED gempyre_BINARY_DIR )
-
-if(SKBUILD)
-    if(WIN32)
-        # Otherwise this is injected withing find_package
-        # Look path as lib may not exits at this phase
-        file(GLOB_RECURSE UVA_D LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/*gempyrelib)
-        list(FILTER UVA_D INCLUDE REGEX gempyre-build)
-        if(NOT UVA_D)
-            message(FATAL_ERROR "Cannot find gempyrelib from ${CMAKE_SOURCE_DIR}/_skbuild")
-        endif()
-        list(GET UVA_D 0 UVA_F)
-        set(UVA_PATH  "${UVA_F}/gempyrelib/libuv-prefix/src/libuv-build")
-        # target_link_libraries requires that a the lib can be resolved - however
-        # as here we get it only when the fetch's add_external project has done it
-        # it is is added only as a compiler parameter.
-        target_link_options(${LIB_NAME} PRIVATE "/LIBPATH:${UVA_PATH};uv_a.lib")   
+    if(SKBUILD)
+        if(WIN32)
+            option(USE_UWEBSOCKETS "Turn on if Gempyre uses uwebsockets" OFF)
+            if (USE_UWEBSOCKETS)
+                # Otherwise this is injected withing find_package
+                # Look path as lib may not exits at this phase
+                file(GLOB_RECURSE UVA_D LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/_skbuild/*gempyrelib)
+                list(FILTER UVA_D INCLUDE REGEX gempyre-build)
+                if(NOT UVA_D)
+                    message(FATAL_ERROR "Cannot find gempyrelib from ${CMAKE_SOURCE_DIR}/_skbuild")
+                endif()
+                list(GET UVA_D 0 UVA_F)
+                set(UVA_PATH  "${UVA_F}/gempyrelib/libuv-prefix/src/libuv-build")
+                # target_link_libraries requires that a the lib can be resolved - however
+                # as here we get it only when the fetch's add_external project has done it
+                # it is is added only as a compiler parameter.
+                target_link_options(${LIB_NAME} PRIVATE "/LIBPATH:${UVA_PATH};uv_a.lib")
+            endif()   
         endif()
     endif()
     target_link_libraries (${LIB_NAME} PRIVATE gempyre)
