@@ -76,7 +76,7 @@ jobs:
         ninja --version
         make --version
         gcc --version
-        sudo apt-get install libegl1-mesa
+        # not valid in 24 Ubuntu sudo apt-get install libegl1-mesa
         sudo apt-get install doxygen
         sudo apt-get install graphviz
         sudo apt-get install aspell     
