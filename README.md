@@ -100,6 +100,40 @@ The programming interface is very same as in [Gempyre](https://github.com/mmerta
 Please look  [Gempyre](https://github.com/mmertama/Gempyre.git) for documentation.
 
 Please note that Gempyre Core and Gempyre Graphics are part of Python API, but not Gempyre-Utils, it has C++ utilites and thus not applicable for Python programmers as everything and more is already there!
+
+## Python spesific issues:
+
+As Gempyre is having its own event loop, using with asyncio needs Gempyre to be executed in its own thread.
+
+Example
+
+```python
+
+# non-async
+def draw(canvas):
+  fc = Gempyre.FrameComposer()
+  fc.fill_style("magenta")
+  fc.fill_rect(Gempyre.Rect(1, 1, 30, 30)) 
+  canvas.draw_frame(fc)
+
+# async
+async def on_open(canvas)
+  await asyncio.sleep(3) # example wait
+  draw(canvas)
+
+async def main():
+  map, names = resource.from_bytes({"ui.html": bytes(html, 'utf-8')})
+  ui = Gempyre.Ui(map, names["ui.html"])
+  loop = asyncio.get_running_loop()  # Get the current event loop
+  # Schedule on_open to be called in the event loop thread
+  ui.on_open(lambda: loop.call_soon_threadsafe(asyncio.create_task, on_open(Gempyre.CanvasElement(ui, 'canvas'))))
+  # Run ui.run() in a separate thread
+  await asyncio.to_thread(ui.run)
+
+if __name__ == "__main__":
+  asyncio.run(main())
+
+```
   
 ## Examples
 
