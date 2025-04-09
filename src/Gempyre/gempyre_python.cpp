@@ -293,12 +293,14 @@ PYBIND11_MODULE(_gempyre, m) {
         .def("set_timer__on_hold", &Gempyre::Ui::set_timer_on_hold)
         .def("is_timer__on_hold", &Gempyre::Ui::is_timer_on_hold)
         .def("device_pixel_ratio", &Gempyre::Ui::device_pixel_ratio)
+        .def("available", &Gempyre::Ui::available)
             ;
 
         py::class_<Gempyre::CanvasElement, Gempyre::Element>(m, "CanvasElement")
                 .def(py::init<const Gempyre::CanvasElement&>())
                 .def(py::init<Gempyre::Ui&, const std::string&>())
                 .def(py::init<Gempyre::Ui&, const std::string&, const Gempyre::Element&>())
+                .def(py::init<Gempyre::Ui&, const Gempyre::Element&>())
                 .def("add_image", [](Gempyre::CanvasElement* canvas, const std::string& url, const std::function<void (const std::string& id)> loaded = nullptr){
                     return canvas->add_image(url, [loaded](std::string_view id) {if(loaded) {py::gil_scoped_acquire acquire; loaded(std::string{id});}});})
                 .def("paint_image", [](Gempyre::CanvasElement* el, const std::string& imageId, int x, int y, const RectF& clippingRect) {

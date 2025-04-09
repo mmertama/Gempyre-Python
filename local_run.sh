@@ -10,6 +10,7 @@ POTATO=$(python3 -c 'import sysconfig
 platform_info = sysconfig.get_platform()
 python_version = sysconfig.get_python_version()
 print(f"{platform_info}-{python_version}")')
+echo $POTATO
 PYTHONPATH=./_skbuild/$POTATO/cmake-install/src python3 "$@"
 
 
