@@ -32,8 +32,8 @@ See also Create a venv (https://docs.python.org/3/library/venv.html)
 
 You can clone the repository and do install, or get releases from repository.
 
-Gempyre-Python uses scikit build (some OS would need use python3 instead of python):
-`python -m build && pip install -e .`
+Gempyre-Python uses scikit build (some OS would need use python3 instead of python, you may need `pip install scikit-build` first):
+`python -m build && pip install .`
 
 ## Notes:
 ### Raspberry OS

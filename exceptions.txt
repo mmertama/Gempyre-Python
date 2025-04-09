@@ -1,0 +1,6 @@
+# This file contains exceptions where there is no Gempyre-Python function vs Gempyre
+# That excludes GempyreUtils (use not available at all) and certain overloads
+
+Gempyre::Bitmap::const_data     # const is irrelevant in python
+Gempyre::Element::html_stream   # no streams
+Gempyre::Ui::set_timer_on_hold  # should not be needed
