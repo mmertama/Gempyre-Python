@@ -157,7 +157,10 @@ PYBIND11_MODULE(_gempyre, m) {
             .def("rect", [](Gempyre::Element* el) {
                 const auto r = el->rect();
                 return r ? std::make_optional<RectF>(::rectF(*r)) :  std::nullopt;
-                });
+                })
+            .def("parent", &Gempyre::Element::parent);
+                ;
+
     py::class_<Gempyre::Ui>(m, "Ui")
         .def(py::init([](
             const std::map<std::string, std::string>& map, 
@@ -359,6 +362,10 @@ PYBIND11_MODULE(_gempyre, m) {
                 .def("merge_at", py::overload_cast<int, int, const Gempyre::Bitmap&>(&Gempyre::Bitmap::merge))
                 .def("merge", py::overload_cast<const Gempyre::Bitmap&>(&Gempyre::Bitmap::merge))
                 .def("swap", &Gempyre::Bitmap::swap)
+                .def("clip", &Gempyre::Bitmap::clip)
+                .def("empty", &Gempyre::Bitmap::empty)
+                .def("tile", &Gempyre::Bitmap::empty)
+                .def("png_image", &Gempyre::Bitmap::png_image)
                 ;
         
         py::class_<Gempyre::FrameComposer>(m, "FrameComposer")

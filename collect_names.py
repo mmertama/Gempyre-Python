@@ -42,15 +42,20 @@ def main():
             functions.append(els)
             
     exceptions = set()
+    exceptions_map = {}
     with open('exceptions.txt') as f:
         for line in f.readlines():
             m = re.match(r'\s*([a-zA-Z_][^# ]+)', line)
             if m:
-                exceptions.add(m[1])        
+                exceptions.add(m[1])
+            m = re.match(r'\s*([a-zA-Z_]\s*->\s*([a-zA-Z_])[^# ]+)', line)
+            if m:
+                exceptions_map[m[1]] = m[2]                    
     
     for func in functions:
         name = '::'.join(func)
-        if name not in items['method'] and name not in exceptions and func[-1] != func[-2]: # skip constructors
+        if name not in items['method'] and name not in exceptions and (
+            name not in exceptions_map or exceptions_map[name] not in items['method']) and func[-1] != func[-2]: # skip constructors
             print(f"'{name}'")
         
 

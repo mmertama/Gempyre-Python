@@ -3,4 +3,11 @@
 
 Gempyre::Bitmap::const_data     # const is irrelevant in python
 Gempyre::Element::html_stream   # no streams
+Gempyre::Ui::is_timer_on_hold   # should not be needed
 Gempyre::Ui::set_timer_on_hold  # should not be needed
+Gempyre::Bitmap::pix            # for some reason static are not working
+Gempyre::CanvasElement::draw -> Gempyre::CanvasElement::draw_frame
+Gempyre::Bitmap::set_data       # templated function has to be wrapped (TODO)
+GempyreUtils::LogWriter::do_write   # No utils
+GempyreUtils::LogWriter::has_ansi   # No utils
+GempyreUtils::LogWriter::header     # No utils
