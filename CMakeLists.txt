@@ -96,14 +96,17 @@ if(NOT gempyre_FOUND)
     set (HAS_TEST OFF CACHE INTERNAL "Turn off")
     set (NO_EXPORT TRUE CACHE INTERNAL "Turn off")
     FetchContent_Declare(gempyre
-    GIT_REPOSITORY https://github.com/mmertama/Gempyre.git)
+    GIT_REPOSITORY https://github.com/mmertama/Gempyre.git
+    CMAKE_ARGS -DCMAKE_POLICY_VERSION_MINIMUM=3.5 
+    )
 
-    FetchContent_GetProperties(gempyre)
-
-    if(NOT gempyre_POPULATED)
-        FetchContent_Populate(gempyre)
-        add_subdirectory(${gempyre_SOURCE_DIR} ${gempyre_BINARY_DIR}) 
-    endif()
+    FetchContent_MakeAvailable(gempyre)
+    #FetchContent_GetProperties(gempyre)
+    #
+    #if(NOT gempyre_POPULATED)
+    #    FetchContent_Populate(gempyre)
+    #    add_subdirectory(${gempyre_SOURCE_DIR} ${gempyre_BINARY_DIR}) 
+    #endif()
 endif()    
 
 include_directories (
@@ -117,12 +120,13 @@ FetchContent_Declare( pybind11
     GIT_TAG        v2.13.6
 )
 
-FetchContent_GetProperties(pybind11)
-
-if(NOT pybind11_POPULATED)
-    FetchContent_Populate(pybind11)
-    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
-endif()
+FetchContent_MakeAvailable(pybind11)
+#FetchContent_GetProperties(pybind11)
+#
+#if(NOT pybind11_POPULATED)
+#    FetchContent_Populate(pybind11)
+#    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+#endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/README.md
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
