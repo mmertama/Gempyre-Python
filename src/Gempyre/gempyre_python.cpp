@@ -117,6 +117,9 @@ PYBIND11_MODULE(_gempyre, m) {
     py::class_<Gempyre::Event>(m, "Event")
             .def_readonly("element", &Gempyre::Event::element)
             .def_readonly("properties", &Gempyre::Event::properties)
+            .def("has_true", [](Gempyre::Event* e, std::string_view key){
+                return Gempyre::Event::has_true(e->properties, key); // this works a bit different than a C++ version
+            })
             ;
 
     py::class_<RectF>(m, "Rect")
@@ -297,6 +300,12 @@ PYBIND11_MODULE(_gempyre, m) {
         .def("is_timer__on_hold", &Gempyre::Ui::is_timer_on_hold)
         .def("device_pixel_ratio", &Gempyre::Ui::device_pixel_ratio)
         .def("available", &Gempyre::Ui::available)
+        .def("add_data", &Gempyre::Ui::add_data)
+        .def("flush", &Gempyre::Ui::flush)
+        .def("resize", &Gempyre::Ui::resize)
+        .def("set_title", &Gempyre::Ui::set_title)
+        .def("set_application_icon", &Gempyre::Ui::set_application_icon)
+        .def_static("to_file_map", &Gempyre::Ui::to_file_map)
             ;
 
         py::class_<Gempyre::CanvasElement, Gempyre::Element>(m, "CanvasElement")
@@ -352,7 +361,6 @@ PYBIND11_MODULE(_gempyre, m) {
                 .def(py::init<const std::vector<uint8_t>&>())
                 .def("create", &Gempyre::Bitmap::create)
                 .def("clone", &Gempyre::Bitmap::clone)
-                .def_static("pix", &Gempyre::Bitmap::pix, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF)
                 .def("set_pixel", &Gempyre::Bitmap::set_pixel)
                 .def("set_alpha", &Gempyre::Bitmap::set_alpha)
                 .def("pixel", &Gempyre::Bitmap::pixel)
@@ -366,6 +374,10 @@ PYBIND11_MODULE(_gempyre, m) {
                 .def("empty", &Gempyre::Bitmap::empty)
                 .def("tile", &Gempyre::Bitmap::empty)
                 .def("png_image", &Gempyre::Bitmap::png_image)
+                .def("set_data", [](Gempyre::Bitmap* g, const std::vector<Gempyre::Color::type>& bytes, size_t offset = 0)-> bool {
+                    return g->set_data(bytes, offset); // set_data should be fixed to take byte spans
+                })
+                .def_static("pix", &Gempyre::Bitmap::pix, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a") = 0xFF)
                 ;
         
         py::class_<Gempyre::FrameComposer>(m, "FrameComposer")

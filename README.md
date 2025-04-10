@@ -99,7 +99,9 @@ The programming interface is very same as in [Gempyre](https://github.com/mmerta
 
 Please look  [Gempyre](https://github.com/mmertama/Gempyre.git) for documentation.
 
-Please note that Gempyre Core and Gempyre Graphics are part of Python API, but not Gempyre-Utils, it has C++ utilites and thus not applicable for Python programmers as everything and more is already there!
+There are some differences with functions, mainly due C++ overloading - I have left out some parameter combinations that are not important. See [exceptions.txt](https://github.com/mmertama/Gempyre-Python/blob/master/exceptions.txt). 
+
+Please note that Gempyre Core and Gempyre Graphics are part of Python API, but not GempyreUtils, it has C++ utilites and thus not applicable for Python programmers as everything and more is already there!
 
 ## Python spesific issues:
 
