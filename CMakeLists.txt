@@ -97,7 +97,6 @@ if(NOT gempyre_FOUND)
     set (NO_EXPORT TRUE CACHE INTERNAL "Turn off")
     FetchContent_Declare(gempyre
     GIT_REPOSITORY https://github.com/mmertama/Gempyre.git
-    CMAKE_ARGS -DCMAKE_POLICY_VERSION_MINIMUM=3.5 
     )
 
     FetchContent_MakeAvailable(gempyre)

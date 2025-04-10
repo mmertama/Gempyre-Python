@@ -23,10 +23,11 @@ or using Poetry
 ```bash
 poetry add Gempyre
 ```
-
+gi
 Installs Gempyre to the current user site-packages.
 
-See also Create a venv (https://docs.python.org/3/library/venv.html)
+See also  (https://docs.python.org/3/library/venv.html)
+or (https://python-poetry.org/), or (https://pipenv.pypa.io/en/latest/)
 
 ## Build from sources
 
