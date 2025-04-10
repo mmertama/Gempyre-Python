@@ -162,7 +162,7 @@ jobs:
           VER=$(tar -tf gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }} | grep 'dist/Gempyre-.*-' | cut -d '-' -f 2)
           if [[ "$REL" != "$VER" ]]; then
             tar -tf gempyre-py-${{ env.RELEASE_VERSION }}-${{ matrix.config.artifact }} 
-            echo "Invalid version in pyproject.toml $VER"
+            echo "Invalid version in pyproject.toml $VER, when $REL was expected"
             exit 1
           fi      
 

@@ -5,9 +5,6 @@ import re
 
 DOX_FUNC="https://mmertama.github.io/Gempyre/functions_func.html"
 
-def is_capsule(o):
-    t = type(o)
-    return t.__name__ == 'PyCapsule'
 
 def list_items(module, context):
     content = {'function':[], 'class':[], 'method':[], 'data':[]}
