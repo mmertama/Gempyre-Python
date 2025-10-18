@@ -46,6 +46,9 @@ Todo: Needs optional RASPEBERRY flag to be passed to CMake.
 You may need python3-dev and python3-pip be installed. This may depend on your evironment,
 In linux e.g. apt-get install python3-dev, in MacOS look brew.
 
+Dialogs requires pywebview installed that wont be hard dependency on 1.8.2 onwards. 
+Upon need, please install manually.
+
 ### Build with scikit-build
 
 ```bash
