@@ -53,7 +53,7 @@ Upon need, please install manually.
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activatex
 pip3 install scikit-build
 pip3 install .
 python3 examples/balls/balls.py
