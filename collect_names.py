@@ -2,6 +2,7 @@ import Gempyre
 import inspect
 import urllib.request
 import re
+import sys
 
 DOX_FUNC="https://mmertama.github.io/Gempyre/functions_func.html"
 
@@ -42,7 +43,7 @@ def main():
             
     exceptions = set()
     exceptions_map = {}
-    with open('exceptions.txt') as f:
+    with open(sys.path[0] + '/exceptions.txt') as f:
         for line in f.readlines():
             m = re.match(r'\s*([a-zA-Z_][^# ]+)', line)
             if m:
