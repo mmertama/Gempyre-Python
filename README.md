@@ -53,11 +53,12 @@ Upon need, please install manually.
 
 ```bash
 python3 -m venv venv
-source venv/bin/activatex
+source venv/bin/activate
 pip3 install scikit-build
-pip3 install .
-python3 examples/balls/balls.py
+pip3 install <gempyre-python-dir>  # gempyre-python-dir is just . if you are there
+python3 <gempyre-python-dir>/examples/balls/balls.py
 ```
+
 
 ### Windows:
 
